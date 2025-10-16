@@ -91,7 +91,6 @@
             border-radius: 0.5rem;
             transition: all 0.3s ease;
         }
-        /* 新增高亮樣式 */
         .highlight-me {
             background-color: rgba(138, 43, 226, 0.3);
             border-left: 4px solid #c392ff;
@@ -189,16 +188,27 @@
         const db = getFirestore(app);
         const leaderboardRef = collection(db, "leaderboard");
 
+        // --- 最終版題庫 ---
         const questions = [
-            { question: "Galaxy S 系列手機的「超明亮夜拍」功能，主要解決了什麼拍照痛點？", options: ["白天照片過曝", "自拍不夠好看", "在低光源環境下拍出清晰明亮的照片", "無法拍攝超廣角照片"], answer: 2 },
+            // 新題目 A
+            { question: "三星最新的 Galaxy AI 功能中，哪一項可以讓你用 S Pen 或手指圈選畫面上任何物件，立即進行網路搜尋？", options: ["語音翻譯", "生成式相片編輯", "智慧摘要", "搜尋圈 (Circle to Search)"], answer: 3 },
+            // 保留 #2
             { question: "當你想將 Galaxy 手機中的照片快速傳給朋友的三星平板，應該使用哪個內建功能最方便？", options: ["SmartThings", "快速分享 (Quick Share)", "Samsung DeX", "Bixby"], answer: 1 },
+            // 保留 #3
             { question: "Galaxy Z Fold 系列摺疊手機在展開內頁螢幕時，最多可以同時開啟幾個應用程式視窗進行多工處理？", options: ["一個", "兩個", "三個", "四個"], answer: 2 },
+            // 保留 #4
             { question: "Galaxy Watch 上的 BioActive 感應器，不包含以下哪一項健康數據偵測？", options: ["身體組成 (BIA)", "心電圖 (ECG)", "血糖濃度", "血氧飽和度 (SpO2)"], answer: 2 },
+            // 保留 #5
             { question: "Samsung Wallet (原 Samsung Pay) 除了信用卡支付外，還整合了下列哪項便利功能？", options: ["線上購物", "悠遊卡與門禁卡", "股票下單", "繳納電費"], answer: 1 },
-            { question: "三星的 S Pen 最初是為哪個經典的旗艦系列所設計的？", options: ["Galaxy S 系列", "Galaxy A 系列", "Galaxy Note 系列", "Galaxy Z 系列"], answer: 2 },
-            { question: "Galaxy Buds 系列的「智慧主動式降噪 (ANC)」功能，其最大特色是什麼？", options: ["只能完全隔絕噪音", "能偵測用戶說話並自動切換為環境音模式", "只能在三星手機上使用", "需要手動開啟或關閉"], answer: 1 },
-            { question: "三星旗艦手機螢幕所使用的「Dynamic AMOLED 2X」技術，其中「2X」代表了什麼？", options: ["兩倍的解析度", "支援 120Hz 高更新率", "螢幕可以對摺二次", "亮度是前代的兩倍"], answer: 1 },
-            { question: "如果你想用手機統一控制家中的三星電視、冰箱和冷氣，應該使用哪個 App？", options: ["Galaxy Store", "Samsung Health", "SmartThings", "Bixby Home"], answer: 2 },
+            // 新題目 D
+            { question: "Galaxy S 旗艦系列的相機具備強大的「AI 變焦」技術，最高可支援到幾倍的數位變焦來拍攝遠方景物？", options: ["30倍", "50倍", "100倍", "200倍"], answer: 2 },
+            // 新題目 I
+            { question: "三星的 Galaxy 旗艦手機與手錶通常具備 IP68 防水防塵等級，其中數字 '8' 代表它可以在多深的水下正常運作？", options: ["0.5 公尺", "1 公尺", "1.5 公尺", "3 公尺"], answer: 2 },
+            // 新題目 S
+            { question: "如果您是一位喜歡高度客製化手機介面的玩家，三星官方推出了哪一款 App，可以讓您自由調整如鎖定畫面、多工處理視窗等各種細節？", options: ["Galaxy Labs", "Good Lock", "Theme Park", "Expert RAW"], answer: 1 },
+            // 新題目 JJ
+            { question: "'Samsung' (三星) 這個名字在韓文中的意思是什麼，象徵著宏大、強大與永恆？", options: ["科技之星", "三顆星星", "未來之星", "亞洲之星"], answer: 1 },
+            // 保留 #10
             { question: "三星為了永續發展而推動的「Galaxy for the Planet」計畫，使用了下列何種回收材料來製作部分手機元件？", options: ["回收寶特瓶", "廢棄漁網", "舊報紙", "二手輪胎"], answer: 1 }
         ];
         
@@ -244,12 +254,10 @@
         // --- 閒置計時器 ---
         function resetIdleTimer() {
             clearTimeout(idleTimer);
-            // 只在非主畫面時設定計時器
             if (!screens.start.classList.contains('active')) {
                 idleTimer = setTimeout(() => {
-                    // 自動返回主畫面
                     switchScreen('start');
-                }, 30000); // 30秒
+                }, 30000);
             }
         }
 
@@ -257,7 +265,7 @@
         function switchScreen(screenName) {
             Object.values(screens).forEach(screen => screen.classList.remove('active'));
             screens[screenName].classList.add('active');
-            resetIdleTimer(); // 每次切換畫面都重置計時器
+            resetIdleTimer();
         }
 
         function startGame() {
@@ -302,7 +310,7 @@
                 timerBar.style.width = `${(timeLeft / 15) * 100}%`;
                 if (timeLeft <= 0) {
                     clearInterval(timerInterval);
-                    selectAnswer(-1, questions[currentQuestionIndex].answer); // 時間到，算答錯
+                    selectAnswer(-1, questions[currentQuestionIndex].answer);
                 }
                 document.getElementById('timer').textContent = Math.ceil(timeLeft);
             }, 100);
@@ -408,7 +416,6 @@
                     if (!leaderboardList.contains(leaderboardMessage)) {
                         leaderboardList.appendChild(leaderboardMessage);
                     }
-
                     if(error.code === 'failed-precondition') {
                         leaderboardMessage.innerHTML += '<br><br><small>提示：請按 F12 打開開發者工具，查看 Console 中的錯誤連結來建立索引。</small>';
                     }
@@ -420,13 +427,15 @@
         async function handleInteraction(callback) {
             if (Tone.context.state !== 'running') {
                 await Tone.start();
-                console.log('音效已啟用');
             }
             playSound('click');
             callback();
         }
 
-        startBtn.onclick = () => handleInteraction(() => switchScreen('rules'));
+        startBtn.onclick = () => handleInteraction(() => {
+            currentPlayerDocId = null;
+            switchScreen('rules');
+        });
         playBtn.onclick = () => handleInteraction(startGame);
         submitScoreBtn.onclick = () => handleInteraction(saveScore);
         leaderboardBtn.onclick = () => handleInteraction(() => {
@@ -438,14 +447,12 @@
             switchScreen('start');
         });
         
-        // 啟動閒置計時器
         ['mousedown', 'mousemove', 'touchstart', 'keydown'].forEach(event => {
             document.addEventListener(event, resetIdleTimer, true);
         });
 
-        // 啟動排行榜即時監聽
         setupLeaderboardListener();
-        resetIdleTimer(); // 初始啟動一次
+        resetIdleTimer();
 
     </script>
 </body>
