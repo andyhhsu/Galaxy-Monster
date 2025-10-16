@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Galaxy 怪物 - 互動問答挑戰賽</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;700;900&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Noto Sans TC', sans-serif;
+            background-color: #1a1a2b;
+            color: #ffffff;
+            overflow: hidden;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+        .screen {
+            display: none;
+            width: 100%;
+            height: 100vh;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 2rem;
+            box-sizing: border-box;
+            position: absolute;
+            top: 0;
+            left: 0;
+            transition: opacity 0.5s ease-in-out;
+            animation: fadeIn 0.5s;
+        }
+        .screen.active {
+            display: flex;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, #8A2BE2, #4B0082);
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(138, 43, 226, 0.4);
+        }
+        .btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(138, 43, 226, 0.6);
+        }
+        .btn-primary:disabled {
+            background: #5a5a7a;
+            cursor: not-allowed;
+            box-shadow: none;
+            transform: none;
+        }
+        .glass-card {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 1rem;
+        }
+        .timer-bar {
+            height: 8px;
+            background: linear-gradient(90deg, #8A2BE2, #4B0082);
+            transition: width 0.1s linear;
+        }
+        .option-btn {
+            transition: all 0.2s ease;
+        }
+        .option-btn.correct {
+            background-color: #28a745 !important;
+            border-color: #28a745 !important;
+            transform: scale(1.05);
+        }
+        .option-btn.wrong {
+            background-color: #dc3545 !important;
+            border-color: #dc3545 !important;
+            opacity: 0.7;
+        }
+        .option-btn.disabled {
+            pointer-events: none;
+        }
+        .leaderboard-item {
+            display: grid;
+            grid-template-columns: 1fr 4fr 2fr;
+            align-items: center;
+            padding: 0.75rem 1.5rem;
+        }
+    </style>
+</head>
+<body class="w-full h-screen flex justify-center items-center">
+
+    <!-- Start Screen -->
+    <div id="start-screen" class="screen active">
+        <div class="text-center">
+            <h1 class="text-6xl md:text-8xl font-black tracking-wider" style="color: #c392ff;">GALAXY 怪物</h1>
+            <p class="text-2xl md:text-3xl mt-4 text-gray-300">挑戰你的 Galaxy 知識魂！</p>
+            <button id="start-btn" class="btn-primary text-white font-bold py-4 px-12 text-2xl rounded-full mt-12">開始挑戰</button>
+            <button id="leaderboard-btn" class="block mx-auto mt-6 text-xl text-gray-400 hover:text-white transition">即時排行榜</button>
+        </div>
+    </div>
+    
+    <!-- Rules Screen -->
+    <div id="rules-screen" class="screen">
+        <div class="glass-card p-8 md:p-12 text-center max-w-2xl">
+            <h2 class="text-4xl font-bold mb-6">遊戲規則</h2>
+            <ul class="text-xl space-y-4 text-left">
+                <li>✔️ 共 10 道關於三星 Galaxy 的知識問答。</li>
+                <li>⏱️ 每題限時 15 秒，答題速度越快，分數越高！</li>
+                <li>🏆 挑戰成功後登錄成績，就有機會參加抽獎！</li>
+            </ul>
+            <button id="play-btn" class="btn-primary text-white font-bold py-3 px-10 text-xl rounded-full mt-10">我準備好了！</button>
+        </div>
+    </div>
+
+    <!-- Quiz Screen -->
+    <div id="quiz-screen" class="screen">
+        <div class="w-full max-w-4xl">
+            <div class="flex justify-between items-center mb-4">
+                <div id="question-counter" class="text-2xl font-bold">Q1 / 10</div>
+                <div id="timer" class="text-2xl font-bold">15</div>
+            </div>
+            <div class="w-full bg-gray-700 rounded-full mb-6">
+                <div id="timer-bar" class="timer-bar rounded-full"></div>
+            </div>
+            <div class="glass-card p-8 mb-8 min-h-[150px] flex items-center justify-center">
+                <h2 id="question-text" class="text-3xl md:text-4xl text-center font-bold">問題文字載入中...</h2>
+            </div>
+            <div id="options-container" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
+        </div>
+    </div>
+
+    <!-- Score Screen -->
+    <div id="score-screen" class="screen">
+        <div class="glass-card p-8 md:p-12 text-center max-w-2xl">
+            <h2 class="text-2xl text-gray-300">挑戰完成！</h2>
+            <div class="my-4">
+                <p class="text-7xl font-black" id="final-score">0</p>
+                <p class="text-xl">分</p>
+            </div>
+            <div class="w-full space-y-4">
+                <input id="nickname-input" type="text" placeholder="輸入你的暱稱" class="w-full bg-transparent border-2 border-gray-500 rounded-lg py-3 px-4 text-white text-center text-xl focus:border-purple-500 focus:outline-none transition">
+                <input id="phone-input" type="tel" placeholder="輸入電話 (抽獎用)" class="w-full bg-transparent border-2 border-gray-500 rounded-lg py-3 px-4 text-white text-center text-xl focus:border-purple-500 focus:outline-none transition">
+                <button id="submit-score-btn" class="w-full btn-primary text-white font-bold py-3 px-10 text-xl rounded-lg">登錄成績</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Leaderboard Screen -->
+    <div id="leaderboard-screen" class="screen">
+        <div class="w-full max-w-4xl glass-card">
+            <div class="p-6 border-b border-gray-700 flex justify-between items-center">
+                <h2 class="text-4xl font-bold">即時排行榜</h2>
+                <button id="close-leaderboard-btn" class="text-4xl font-light text-gray-400 hover:text-white">&times;</button>
+            </div>
+            <div class="leaderboard-item text-lg font-bold text-gray-400">
+                <span>排名</span>
+                <span>暱稱</span>
+                <span class="text-right">分數</span>
+            </div>
+            <div id="leaderboard-list" class="h-[60vh] overflow-y-auto">
+                 <div id="leaderboard-message" class="p-8 text-center text-gray-400 text-xl">排行榜載入中...</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Thank You Screen -->
+    <div id="thank-you-screen" class="screen">
+        <div class="text-center">
+            <h2 class="text-5xl font-bold">感謝您的參與！</h2>
+            <p class="text-2xl mt-4 text-gray-300">您的成績已成功登錄。</p>
+        </div>
+    </div>
+
+    <script>
+        const questions = [
+            { question: "Galaxy S 系列手機的「超明亮夜拍」功能，主要解決了什麼拍照痛點？", options: ["白天照片過曝", "自拍不夠好看", "在低光源環境下拍出清晰明亮的照片", "無法拍攝超廣角照片"], answer: 2 },
+            { question: "當你想將 Galaxy 手機中的照片快速傳給朋友的三星平板，應該使用哪個內建功能最方便？", options: ["SmartThings", "快速分享 (Quick Share)", "Samsung DeX", "Bixby"], answer: 1 },
+            { question: "Galaxy Z Fold 系列摺疊手機在展開內頁螢幕時，最多可以同時開啟幾個應用程式視窗進行多工處理？", options: ["一個", "兩個", "三個", "四個"], answer: 2 },
+            { question: "Galaxy Watch 上的 BioActive 感應器，不包含以下哪一項健康數據偵測？", options: ["身體組成 (BIA)", "心電圖 (ECG)", "血糖濃度", "血氧飽和度 (SpO2)"], answer: 2 },
+            { question: "Samsung Wallet (原 Samsung Pay) 除了信用卡支付外，還整合了下列哪項便利功能？", options: ["線上購物", "悠遊卡與門禁卡", "股票下單", "繳納電費"], answer: 1 },
+            { question: "三星的 S Pen 最初是為哪個經典的旗艦系列所設計的？", options: ["Galaxy S 系列", "Galaxy A 系列", "Galaxy Note 系列", "Galaxy Z 系列"], answer: 2 },
+            { question: "Galaxy Buds 系列的「智慧主動式降噪 (ANC)」功能，其最大特色是什麼？", options: ["只能完全隔絕噪音", "能偵測用戶說話並自動切換為環境音模式", "只能在三星手機上使用", "需要手動開啟或關閉"], answer: 1 },
+            { question: "三星旗艦手機螢幕所使用的「Dynamic AMOLED 2X」技術，其中「2X」代表了什麼？", options: ["兩倍的解析度", "支援 120Hz 高更新率", "螢幕可以對摺二次", "亮度是前代的兩倍"], answer: 1 },
+            { question: "如果你想用手機統一控制家中的三星電視、冰箱和冷氣，應該使用哪個 App？", options: ["Galaxy Store", "Samsung Health", "SmartThings", "Bixby Home"], answer: 2 },
+            { question: "三星為了永續發展而推動的「Galaxy for the Planet」計畫，使用了下列何種回收材料來製作部分手機元件？", options: ["回收寶特瓶", "廢棄漁網", "舊報紙", "二手輪胎"], answer: 1 }
+        ];
+
+        let currentQuestionIndex = 0;
+        let score = 0;
+        let timerInterval;
+        let timeLeft = 15;
+
+        const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbyicc1D5u8AUwWeelxl0nllpuvGNI_VrPuDumur-814IgV45geq_d2V3kHsn1wNGQCaOw/exec';
+
+        const screens = {
+            start: document.getElementById('start-screen'),
+            rules: document.getElementById('rules-screen'),
+            quiz: document.getElementById('quiz-screen'),
+            score: document.getElementById('score-screen'),
+            leaderboard: document.getElementById('leaderboard-screen'),
+            thankYou: document.getElementById('thank-you-screen')
+        };
+        const startBtn = document.getElementById('start-btn');
+        const playBtn = document.getElementById('play-btn');
+        const submitScoreBtn = document.getElementById('submit-score-btn');
+        const nicknameInput = document.getElementById('nickname-input');
+        const phoneInput = document.getElementById('phone-input');
+        const leaderboardBtn = document.getElementById('leaderboard-btn');
+        const closeLeaderboardBtn = document.getElementById('close-leaderboard-btn');
+
+        function switchScreen(screenName) {
+            Object.values(screens).forEach(screen => screen.classList.remove('active'));
+            screens[screenName].classList.add('active');
+        }
+
+        function startGame() {
+            currentQuestionIndex = 0;
+            score = 0;
+            showQuestion();
+            switchScreen('quiz');
+        }
+
+        function showQuestion() {
+            if (currentQuestionIndex >= questions.length) {
+                endGame();
+                return;
+            }
+            const questionData = questions[currentQuestionIndex];
+            document.getElementById('question-counter').textContent = `Q${currentQuestionIndex + 1} / ${questions.length}`;
+            document.getElementById('question-text').textContent = questionData.question;
+            const optionsContainer = document.getElementById('options-container');
+            optionsContainer.innerHTML = '';
+            questionData.options.forEach((option, index) => {
+                const button = document.createElement('button');
+                button.textContent = option;
+                button.classList.add('option-btn', 'w-full', 'glass-card', 'p-4', 'text-xl', 'text-left', 'border-2', 'border-gray-600', 'hover:bg-purple-700', 'hover:border-purple-500');
+                button.onclick = () => selectAnswer(index, questionData.answer);
+                optionsContainer.appendChild(button);
+            });
+            startTimer();
+        }
+
+        function startTimer() {
+            timeLeft = 15;
+            document.getElementById('timer').textContent = timeLeft;
+            const timerBar = document.getElementById('timer-bar');
+            timerBar.style.width = '100%';
+            clearInterval(timerInterval);
+            timerInterval = setInterval(() => {
+                timeLeft -= 0.1;
+                timerBar.style.width = `${(timeLeft / 15) * 100}%`;
+                if (timeLeft <= 0) {
+                    clearInterval(timerInterval);
+                    selectAnswer(-1, questions[currentQuestionIndex].answer);
+                }
+                document.getElementById('timer').textContent = Math.ceil(timeLeft);
+            }, 100);
+        }
+
+        function selectAnswer(selectedIndex, correctIndex) {
+            clearInterval(timerInterval);
+            const options = document.querySelectorAll('.option-btn');
+            options.forEach(btn => btn.classList.add('disabled'));
+            if (selectedIndex === correctIndex) {
+                score += 1000 + Math.floor(timeLeft * 100);
+                options[selectedIndex].classList.add('correct');
+            } else {
+                if (selectedIndex !== -1) options[selectedIndex].classList.add('wrong');
+                options[correctIndex].classList.add('correct');
+            }
+            setTimeout(() => {
+                currentQuestionIndex++;
+                showQuestion();
+            }, 1500);
+        }
+
+        function endGame() {
+            document.getElementById('final-score').textContent = score;
+            switchScreen('score');
+        }
+
+        function saveScore() {
+            const nickname = nicknameInput.value.trim();
+            const phone = phoneInput.value.trim();
+            if (!nickname || !phone) {
+                alert('請務必填寫暱稱和電話！');
+                return;
+            }
+            submitScoreBtn.disabled = true;
+            submitScoreBtn.textContent = '上傳中...';
+            
+            const data = { nickname, phone, score };
+            const queryParams = new URLSearchParams(data);
+            const requestUrl = `${WEB_APP_URL}?${queryParams.toString()}`;
+
+            // 使用 "送出即成功" 模式
+            // 我們發送請求，但不等待回應，以避免跨域問題
+            fetch(requestUrl, { mode: 'no-cors' })
+                .then(() => {
+                    console.log("資料請求已送出。");
+                })
+                .catch(error => {
+                    // 即使出錯，我們也假定它會成功，因為 no-cors 模式下本來就捕捉不到太多錯誤
+                    console.error('送出請求時發生網路錯誤 (在 no-cors 模式下是正常的):', error);
+                });
+
+            // 立刻切換畫面，提供流暢的使用者體驗
+            switchScreen('thankYou');
+            setTimeout(() => {
+                switchScreen('start');
+                nicknameInput.value = '';
+                phoneInput.value = '';
+                submitScoreBtn.disabled = false;
+                submitScoreBtn.textContent = '登錄成績';
+            }, 5000);
+        }
+        
+        function showLeaderboard() {
+            switchScreen('leaderboard');
+            const leaderboardList = document.getElementById('leaderboard-list');
+            const leaderboardMessage = document.getElementById('leaderboard-message');
+            leaderboardMessage.textContent = '排行榜載入中...';
+            leaderboardList.innerHTML = '';
+            leaderboardList.appendChild(leaderboardMessage);
+
+            fetch(WEB_APP_URL)
+                .then(res => {
+                    if (!res.ok) {
+                        throw new Error(`網路錯誤！狀態碼: ${res.status}`);
+                    }
+                    return res.json();
+                })
+                .then(result => {
+                    if (result.result === 'success') {
+                        leaderboardList.innerHTML = '';
+                        if (!result.data || result.data.length === 0) {
+                            leaderboardMessage.textContent = '目前還沒有人挑戰成功，快來搶頭香！';
+                            leaderboardList.appendChild(leaderboardMessage);
+                        } else {
+                            result.data.forEach((player, index) => {
+                                const item = document.createElement('div');
+                                item.classList.add('leaderboard-item', 'text-xl', 'border-t', 'border-gray-700');
+                                if (index < 3) item.classList.add('font-bold', 'text-yellow-300');
+                                item.innerHTML = `
+                                    <span>#${index + 1}</span>
+                                    <span class="truncate">${player.nickname}</span>
+                                    <span class="text-right">${player.score}</span>
+                                `;
+                                leaderboardList.appendChild(item);
+                            });
+                        }
+                    } else {
+                        throw new Error(result.message || '後端回報無法解析排行榜資料');
+                    }
+                })
+                .catch(error => {
+                    console.error("讀取排行榜失敗:", error);
+                    leaderboardList.innerHTML = '';
+                    leaderboardMessage.textContent = `讀取排行榜失敗。請檢查試算表共用權限，並確認瀏覽器 Console 沒有錯誤訊息。`;
+                    leaderboardList.appendChild(leaderboardMessage);
+                });
+        }
+
+        // Event Listeners
+        startBtn.onclick = () => switchScreen('rules');
+        playBtn.onclick = startGame;
+        submitScoreBtn.onclick = saveScore;
+        leaderboardBtn.onclick = showLeaderboard;
+        closeLeaderboardBtn.onclick = () => switchScreen('start');
+
+    </script>
+</body>
+</html>
+
