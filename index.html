@@ -11,20 +11,23 @@
     <!-- 引入 Tone.js 音效函式庫 -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.7.77/Tone.js"></script>
     <style>
+        html, body {
+            height: 100%;
+            overflow: hidden; /* 防止 body 本身滾動 */
+        }
         body {
             font-family: 'Noto Sans TC', sans-serif;
             background-color: #1a1a2b;
             color: #ffffff;
-            overflow: hidden;
             user-select: none;
             -webkit-user-select: none;
         }
         .screen {
             display: none;
             width: 100%;
-            height: 100vh;
+            height: 100%; /* 改為 100% */
             flex-direction: column;
-            justify-content: center;
+            justify-content: flex-start; /* 改為從頭開始對齊 */
             align-items: center;
             padding: 2rem;
             box-sizing: border-box;
@@ -33,6 +36,16 @@
             left: 0;
             transition: opacity 0.5s ease-in-out;
             animation: fadeIn 0.5s;
+            overflow-y: auto; /* 允許畫面內部滾動 */
+        }
+        .screen-content {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            width: 100%;
+            max-width: 1024px; /* 限制內容最大寬度 */
+            min-height: 100%; /* 確保內容至少填滿螢幕高度 */
         }
         .screen.active {
             display: flex;
@@ -102,68 +115,76 @@
 
     <!-- Start Screen -->
     <div id="start-screen" class="screen active">
-        <div class="text-center">
-            <h1 class="text-6xl md:text-8xl font-black tracking-wider" style="color: #c392ff;">GALAXY 怪物</h1>
-            <p class="text-2xl md:text-3xl mt-4 text-gray-300">挑戰你的 Galaxy 知識魂！</p>
-            <button id="start-btn" class="btn-primary text-white font-bold py-4 px-12 text-2xl rounded-full mt-12">開始挑戰</button>
-            <button id="leaderboard-btn" class="block mx-auto mt-6 text-xl text-gray-400 hover:text-white transition">即時排行榜</button>
+        <div class="screen-content text-center">
+            <h1 class="text-5xl sm:text-6xl md:text-8xl font-black tracking-wider" style="color: #c392ff;">GALAXY 怪物</h1>
+            <p class="text-xl sm:text-2xl md:text-3xl mt-4 text-gray-300">挑戰你的 Galaxy 知識魂！</p>
+            <button id="start-btn" class="btn-primary text-white font-bold py-3 px-10 sm:py-4 sm:px-12 text-xl sm:text-2xl rounded-full mt-12">開始挑戰</button>
+            <button id="leaderboard-btn" class="block mx-auto mt-6 text-lg sm:text-xl text-gray-400 hover:text-white transition">即時排行榜</button>
         </div>
     </div>
     
     <!-- Rules Screen, Quiz Screen, etc. -->
     <div id="rules-screen" class="screen">
-        <div class="glass-card p-8 md:p-12 text-center max-w-2xl">
-            <h2 class="text-4xl font-bold mb-6">遊戲規則</h2>
-            <ul class="text-xl space-y-4 text-left">
-                <li>✔️ 共 10 道關於三星 Galaxy 的知識問答。</li>
-                <li>⏱️ 每題限時 15 秒，答題速度越快，分數越高！</li>
-                <li>🏆 挑戰成功後登錄成績，就有機會參加抽獎！</li>
-            </ul>
-            <button id="play-btn" class="btn-primary text-white font-bold py-3 px-10 text-xl rounded-full mt-10">我準備好了！</button>
+        <div class="screen-content">
+            <div class="glass-card p-6 sm:p-8 md:p-12 text-center w-full max-w-2xl">
+                <h2 class="text-3xl sm:text-4xl font-bold mb-6">遊戲規則</h2>
+                <ul class="text-lg sm:text-xl space-y-4 text-left">
+                    <li>✔️ 共 10 道關於三星 Galaxy 的知識問答。</li>
+                    <li>⏱️ 每題限時 15 秒，答題速度越快，分數越高！</li>
+                    <li>🏆 挑戰成功後登錄成績，就有機會參加抽獎！</li>
+                </ul>
+                <button id="play-btn" class="btn-primary text-white font-bold py-3 px-10 text-lg sm:text-xl rounded-full mt-10">我準備好了！</button>
+            </div>
         </div>
     </div>
     <div id="quiz-screen" class="screen">
-        <div class="w-full max-w-4xl">
-            <div class="flex justify-between items-center mb-4">
-                <div id="question-counter" class="text-2xl font-bold">Q1 / 10</div>
-                <div id="timer" class="text-2xl font-bold">15</div>
+        <div class="screen-content w-full max-w-4xl">
+            <div class="w-full">
+                <div class="flex justify-between items-center mb-4">
+                    <div id="question-counter" class="text-xl sm:text-2xl font-bold">Q1 / 10</div>
+                    <div id="timer" class="text-xl sm:text-2xl font-bold">15</div>
+                </div>
+                <div class="w-full bg-gray-700 rounded-full mb-6">
+                    <div id="timer-bar" class="timer-bar rounded-full"></div>
+                </div>
+                <div class="glass-card p-6 sm:p-8 mb-8 min-h-[150px] flex items-center justify-center">
+                    <h2 id="question-text" class="text-2xl sm:text-3xl md:text-4xl text-center font-bold">問題文字載入中...</h2>
+                </div>
+                <div id="options-container" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
             </div>
-            <div class="w-full bg-gray-700 rounded-full mb-6">
-                <div id="timer-bar" class="timer-bar rounded-full"></div>
-            </div>
-            <div class="glass-card p-8 mb-8 min-h-[150px] flex items-center justify-center">
-                <h2 id="question-text" class="text-3xl md:text-4xl text-center font-bold">問題文字載入中...</h2>
-            </div>
-            <div id="options-container" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
         </div>
     </div>
     <div id="score-screen" class="screen">
-        <div class="glass-card p-8 md:p-12 text-center max-w-2xl">
-            <h2 class="text-2xl text-gray-300">挑戰完成！</h2>
-            <div class="my-4">
-                <p class="text-7xl font-black" id="final-score">0</p>
-                <p class="text-xl">分</p>
-            </div>
-            <div class="w-full space-y-4">
-                <input id="nickname-input" type="text" placeholder="輸入你的暱稱" class="w-full bg-transparent border-2 border-gray-500 rounded-lg py-3 px-4 text-white text-center text-xl focus:border-purple-500 focus:outline-none transition">
-                <input id="phone-input" type="tel" placeholder="輸入電話 (抽獎用)" class="w-full bg-transparent border-2 border-gray-500 rounded-lg py-3 px-4 text-white text-center text-xl focus:border-purple-500 focus:outline-none transition">
-                <button id="submit-score-btn" class="w-full btn-primary text-white font-bold py-3 px-10 text-xl rounded-lg">登錄成績</button>
+        <div class="screen-content">
+            <div class="glass-card p-6 sm:p-8 md:p-12 text-center w-full max-w-2xl">
+                <h2 class="text-xl sm:text-2xl text-gray-300">挑戰完成！</h2>
+                <div class="my-4">
+                    <p class="text-6xl sm:text-7xl font-black" id="final-score">0</p>
+                    <p class="text-lg sm:text-xl">分</p>
+                </div>
+                <div class="w-full space-y-4">
+                    <input id="nickname-input" type="text" placeholder="輸入你的暱稱" class="w-full bg-transparent border-2 border-gray-500 rounded-lg py-3 px-4 text-white text-center text-lg sm:text-xl focus:border-purple-500 focus:outline-none transition">
+                    <input id="phone-input" type="tel" placeholder="輸入電話 (抽獎用)" class="w-full bg-transparent border-2 border-gray-500 rounded-lg py-3 px-4 text-white text-center text-lg sm:text-xl focus:border-purple-500 focus:outline-none transition">
+                    <button id="submit-score-btn" class="w-full btn-primary text-white font-bold py-3 px-10 text-lg sm:text-xl rounded-lg">登錄成績</button>
+                </div>
             </div>
         </div>
     </div>
     <div id="leaderboard-screen" class="screen">
-        <div class="w-full max-w-4xl glass-card">
-            <div class="p-6 border-b border-gray-700 flex justify-between items-center">
-                <h2 class="text-4xl font-bold">即時排行榜</h2>
-                <button id="close-leaderboard-btn" class="text-4xl font-light text-gray-400 hover:text-white">&times;</button>
-            </div>
-            <div class="leaderboard-item text-lg font-bold text-gray-400">
-                <span>排名</span>
-                <span>暱稱</span>
-                <span class="text-right">分數</span>
-            </div>
-            <div id="leaderboard-list" class="h-[60vh] overflow-y-auto">
-                 <div id="leaderboard-message" class="p-8 text-center text-gray-400 text-xl">排行榜載入中...</div>
+        <div class="screen-content">
+            <div class="w-full max-w-4xl glass-card">
+                <div class="p-6 border-b border-gray-700 flex justify-between items-center">
+                    <h2 class="text-3xl sm:text-4xl font-bold">即時排行榜</h2>
+                    <button id="close-leaderboard-btn" class="text-4xl font-light text-gray-400 hover:text-white">&times;</button>
+                </div>
+                <div class="leaderboard-item text-base sm:text-lg font-bold text-gray-400">
+                    <span>排名</span>
+                    <span>暱稱</span>
+                    <span class="text-right">分數</span>
+                </div>
+                <div id="leaderboard-list" class="h-[60vh] overflow-y-auto">
+                     <div id="leaderboard-message" class="p-8 text-center text-gray-400 text-lg sm:text-xl">排行榜載入中...</div>
+                </div>
             </div>
         </div>
     </div>
@@ -289,7 +310,7 @@
             questionData.options.forEach((option, index) => {
                 const button = document.createElement('button');
                 button.textContent = option;
-                button.classList.add('option-btn', 'w-full', 'glass-card', 'p-4', 'text-xl', 'text-left', 'border-2', 'border-gray-600', 'hover:bg-purple-700', 'hover:border-purple-500');
+                button.classList.add('option-btn', 'w-full', 'glass-card', 'p-4', 'text-lg', 'sm:text-xl', 'text-left', 'border-2', 'border-gray-600', 'hover:bg-purple-700', 'hover:border-purple-500');
                 button.onclick = () => {
                     playSound('click');
                     selectAnswer(index, questionData.answer);
@@ -390,7 +411,7 @@
                     querySnapshot.docs.forEach((doc, index) => {
                         const player = doc.data();
                         const item = document.createElement('div');
-                        item.classList.add('leaderboard-item', 'text-xl', 'border-t', 'border-gray-700');
+                        item.classList.add('leaderboard-item', 'text-lg', 'sm:text-xl', 'border-t', 'border-gray-700');
                         if (index < 3) {
                             item.classList.add('font-bold', 'text-yellow-300');
                         }
