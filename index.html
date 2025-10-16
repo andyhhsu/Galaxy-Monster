@@ -8,6 +8,8 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;700;900&display=swap" rel="stylesheet">
+    <!-- 引入 Tone.js 音效函式庫 -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.7.77/Tone.js"></script>
     <style>
         body {
             font-family: 'Noto Sans TC', sans-serif;
@@ -86,6 +88,14 @@
             grid-template-columns: 1fr 4fr 2fr;
             align-items: center;
             padding: 0.75rem 1.5rem;
+            border-radius: 0.5rem;
+            transition: all 0.3s ease;
+        }
+        /* 新增高亮樣式 */
+        .highlight-me {
+            background-color: rgba(138, 43, 226, 0.3);
+            border-left: 4px solid #c392ff;
+            transform: scale(1.02);
         }
     </style>
 </head>
@@ -158,24 +168,18 @@
             </div>
         </div>
     </div>
-    <div id="thank-you-screen" class="screen">
-        <div class="text-center">
-            <h2 class="text-5xl font-bold">感謝您的參與！</h2>
-            <p class="text-2xl mt-4 text-gray-300">您的成績已成功登錄。</p>
-        </div>
-    </div>
+    <div id="thank-you-screen" class="screen"></div>
 
     <!-- Firebase SDK -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-app.js";
         import { getFirestore, collection, addDoc, query, orderBy, onSnapshot, serverTimestamp, limit } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-firestore.js";
 
-        // 【重要！】您的 Firebase 專案金鑰已更新於此
         const firebaseConfig = {
           apiKey: "AIzaSyBZ2uya0Tjog4blOdKv7evLWL1dB4zs3A4",
           authDomain: "galaxy-monster-quiz.firebaseapp.com",
           projectId: "galaxy-monster-quiz",
-          storageBucket: "galaxy-monster-quiz.appspot.com", // 已為您修正 .app -> .appspot
+          storageBucket: "galaxy-monster-quiz.appspot.com",
           messagingSenderId: "255266989387",
           appId: "1:255266989387:web:8083b19e62f5fb589234ce",
           measurementId: "G-925KTHYCQE"
@@ -185,7 +189,6 @@
         const db = getFirestore(app);
         const leaderboardRef = collection(db, "leaderboard");
 
-        // --- 全域變數與 DOM 元素 ---
         const questions = [
             { question: "Galaxy S 系列手機的「超明亮夜拍」功能，主要解決了什麼拍照痛點？", options: ["白天照片過曝", "自拍不夠好看", "在低光源環境下拍出清晰明亮的照片", "無法拍攝超廣角照片"], answer: 2 },
             { question: "當你想將 Galaxy 手機中的照片快速傳給朋友的三星平板，應該使用哪個內建功能最方便？", options: ["SmartThings", "快速分享 (Quick Share)", "Samsung DeX", "Bixby"], answer: 1 },
@@ -198,10 +201,13 @@
             { question: "如果你想用手機統一控制家中的三星電視、冰箱和冷氣，應該使用哪個 App？", options: ["Galaxy Store", "Samsung Health", "SmartThings", "Bixby Home"], answer: 2 },
             { question: "三星為了永續發展而推動的「Galaxy for the Planet」計畫，使用了下列何種回收材料來製作部分手機元件？", options: ["回收寶特瓶", "廢棄漁網", "舊報紙", "二手輪胎"], answer: 1 }
         ];
+        
         let currentQuestionIndex = 0;
         let score = 0;
         let timerInterval;
         let timeLeft = 15;
+        let currentPlayerDocId = null;
+        let idleTimer;
 
         const screens = { start: document.getElementById('start-screen'), rules: document.getElementById('rules-screen'), quiz: document.getElementById('quiz-screen'), score: document.getElementById('score-screen'), leaderboard: document.getElementById('leaderboard-screen'), thankYou: document.getElementById('thank-you-screen') };
         const startBtn = document.getElementById('start-btn');
@@ -212,15 +218,52 @@
         const leaderboardBtn = document.getElementById('leaderboard-btn');
         const closeLeaderboardBtn = document.getElementById('close-leaderboard-btn');
         
+        // --- 音效設定 ---
+        const sounds = {
+            correct: new Tone.Synth({ oscillator: { type: "sine" }, envelope: { attack: 0.01, decay: 0.2, sustain: 0.2, release: 0.2 } }).toDestination(),
+            wrong: new Tone.Synth({ oscillator: { type: "square" }, envelope: { attack: 0.01, decay: 0.3, sustain: 0.1, release: 0.3 } }).toDestination(),
+            click: new Tone.MembraneSynth({ pitchDecay: 0.01, octaves: 2, envelope: { attack: 0.001, decay: 0.2, sustain: 0 } }).toDestination()
+        };
+
+        function playSound(sound) {
+            if (Tone.context.state !== 'running') return;
+            switch (sound) {
+                case 'correct':
+                    sounds.correct.triggerAttackRelease("C5", "8n", Tone.now());
+                    sounds.correct.triggerAttackRelease("G5", "8n", Tone.now() + 0.1);
+                    break;
+                case 'wrong':
+                    sounds.wrong.triggerAttackRelease("C3", "4n");
+                    break;
+                case 'click':
+                    sounds.click.triggerAttackRelease("C2", "8n");
+                    break;
+            }
+        }
+
+        // --- 閒置計時器 ---
+        function resetIdleTimer() {
+            clearTimeout(idleTimer);
+            // 只在非主畫面時設定計時器
+            if (!screens.start.classList.contains('active')) {
+                idleTimer = setTimeout(() => {
+                    // 自動返回主畫面
+                    switchScreen('start');
+                }, 30000); // 30秒
+            }
+        }
+
         // --- 核心函式 ---
         function switchScreen(screenName) {
             Object.values(screens).forEach(screen => screen.classList.remove('active'));
             screens[screenName].classList.add('active');
+            resetIdleTimer(); // 每次切換畫面都重置計時器
         }
 
         function startGame() {
             currentQuestionIndex = 0;
             score = 0;
+            currentPlayerDocId = null;
             showQuestion();
             switchScreen('quiz');
         }
@@ -239,7 +282,10 @@
                 const button = document.createElement('button');
                 button.textContent = option;
                 button.classList.add('option-btn', 'w-full', 'glass-card', 'p-4', 'text-xl', 'text-left', 'border-2', 'border-gray-600', 'hover:bg-purple-700', 'hover:border-purple-500');
-                button.onclick = () => selectAnswer(index, questionData.answer);
+                button.onclick = () => {
+                    playSound('click');
+                    selectAnswer(index, questionData.answer);
+                };
                 optionsContainer.appendChild(button);
             });
             startTimer();
@@ -256,7 +302,7 @@
                 timerBar.style.width = `${(timeLeft / 15) * 100}%`;
                 if (timeLeft <= 0) {
                     clearInterval(timerInterval);
-                    selectAnswer(-1, questions[currentQuestionIndex].answer);
+                    selectAnswer(-1, questions[currentQuestionIndex].answer); // 時間到，算答錯
                 }
                 document.getElementById('timer').textContent = Math.ceil(timeLeft);
             }, 100);
@@ -267,9 +313,11 @@
             const options = document.querySelectorAll('.option-btn');
             options.forEach(btn => btn.classList.add('disabled'));
             if (selectedIndex === correctIndex) {
+                playSound('correct');
                 score += 1000 + Math.floor(timeLeft * 100);
                 options[selectedIndex].classList.add('correct');
             } else {
+                playSound('wrong');
                 if (selectedIndex !== -1) options[selectedIndex].classList.add('wrong');
                 options[correctIndex].classList.add('correct');
             }
@@ -294,20 +342,20 @@
             submitScoreBtn.disabled = true;
             submitScoreBtn.textContent = '上傳中...';
             try {
-                await addDoc(leaderboardRef, {
+                const docRef = await addDoc(leaderboardRef, {
                     nickname: nickname,
                     phone: phone,
                     score: score,
                     timestamp: serverTimestamp()
                 });
-                switchScreen('thankYou');
-                setTimeout(() => {
-                    switchScreen('start');
-                    nicknameInput.value = '';
-                    phoneInput.value = '';
-                    submitScoreBtn.disabled = false;
-                    submitScoreBtn.textContent = '登錄成績';
-                }, 5000);
+                currentPlayerDocId = docRef.id;
+                switchScreen('leaderboard');
+                
+                nicknameInput.value = '';
+                phoneInput.value = '';
+                submitScoreBtn.disabled = false;
+                submitScoreBtn.textContent = '登錄成績';
+
             } catch (error) {
                 console.error("寫入 Firestore 失敗:", error);
                 alert("成績上傳失敗，請檢查網路或聯繫管理員。");
@@ -317,32 +365,33 @@
         }
 
         function setupLeaderboardListener() {
-            // **FIX:** Moved variable declarations to the top of the function scope
             const leaderboardList = document.getElementById('leaderboard-list');
             const leaderboardMessage = document.getElementById('leaderboard-message');
 
-            // 查詢分數最高的前 20 名
             const q = query(leaderboardRef, orderBy("score", "desc"), orderBy("timestamp", "asc"), limit(20));
             
             onSnapshot(q, (querySnapshot) => {
-                leaderboardList.innerHTML = ''; // 清空舊的排行榜
+                leaderboardList.innerHTML = ''; 
                 
                 if (querySnapshot.empty) {
-                    // **FIX:** Ensure leaderboardMessage exists before trying to set its content
-                    if (leaderboardMessage) {
-                        leaderboardMessage.textContent = '目前還沒有人挑戰成功，快來搶頭香！';
+                    leaderboardMessage.textContent = '目前還沒有人挑戰成功，快來搶頭香！';
+                    if (leaderboardList && !leaderboardList.contains(leaderboardMessage)) {
                         leaderboardList.appendChild(leaderboardMessage);
                     }
                 } else {
-                    // Remove the message if it exists
-                    if (leaderboardMessage) {
-                        leaderboardMessage.remove();
-                    }
-                    querySnapshot.forEach((doc, index) => {
+                    querySnapshot.docs.forEach((doc, index) => {
                         const player = doc.data();
                         const item = document.createElement('div');
                         item.classList.add('leaderboard-item', 'text-xl', 'border-t', 'border-gray-700');
-                        if (index < 3) item.classList.add('font-bold', 'text-yellow-300');
+                        if (index < 3) {
+                            item.classList.add('font-bold', 'text-yellow-300');
+                        }
+                        if (doc.id === currentPlayerDocId) {
+                            item.classList.add('highlight-me');
+                            setTimeout(() => {
+                                item.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                            }, 500);
+                        }
                         item.innerHTML = `
                             <span>#${index + 1}</span>
                             <span class="truncate">${player.nickname}</span>
@@ -354,14 +403,13 @@
             }, (error) => {
                 console.error("監聽排行榜失敗:", error);
                 leaderboardList.innerHTML = '';
-                // **FIX:** Ensure leaderboardMessage exists before using it
-                if (leaderboardMessage) {
+                 if (leaderboardList && leaderboardMessage) {
                     leaderboardMessage.textContent = '讀取排行榜失敗，請檢查 Firestore 規則與網路連線。';
-                    leaderboardList.appendChild(leaderboardMessage);
+                    if (!leaderboardList.contains(leaderboardMessage)) {
+                        leaderboardList.appendChild(leaderboardMessage);
+                    }
 
-                    // 檢查是否有索引建立的錯誤提示
                     if(error.code === 'failed-precondition') {
-                        console.error("Firestore 索引錯誤： Firestore 需要一個複合索引來完成這個查詢。請檢查瀏覽器主控台中的錯誤訊息，裡面應該會有一個連結，點擊該連結可以直接建立所需的索引。");
                         leaderboardMessage.innerHTML += '<br><br><small>提示：請按 F12 打開開發者工具，查看 Console 中的錯誤連結來建立索引。</small>';
                     }
                 }
@@ -369,14 +417,35 @@
         }
         
         // --- 事件監聽 ---
-        startBtn.onclick = () => switchScreen('rules');
-        playBtn.onclick = startGame;
-        submitScoreBtn.onclick = saveScore;
-        leaderboardBtn.onclick = () => switchScreen('leaderboard');
-        closeLeaderboardBtn.onclick = () => switchScreen('start');
+        async function handleInteraction(callback) {
+            if (Tone.context.state !== 'running') {
+                await Tone.start();
+                console.log('音效已啟用');
+            }
+            playSound('click');
+            callback();
+        }
+
+        startBtn.onclick = () => handleInteraction(() => switchScreen('rules'));
+        playBtn.onclick = () => handleInteraction(startGame);
+        submitScoreBtn.onclick = () => handleInteraction(saveScore);
+        leaderboardBtn.onclick = () => handleInteraction(() => {
+             currentPlayerDocId = null;
+             switchScreen('leaderboard');
+        });
+        closeLeaderboardBtn.onclick = () => handleInteraction(() => {
+            currentPlayerDocId = null;
+            switchScreen('start');
+        });
         
+        // 啟動閒置計時器
+        ['mousedown', 'mousemove', 'touchstart', 'keydown'].forEach(event => {
+            document.addEventListener(event, resetIdleTimer, true);
+        });
+
         // 啟動排行榜即時監聽
         setupLeaderboardListener();
+        resetIdleTimer(); // 初始啟動一次
 
     </script>
 </body>
