@@ -101,7 +101,7 @@
         </div>
     </div>
     
-    <!-- Rules Screen -->
+    <!-- Rules Screen, Quiz Screen, etc. -->
     <div id="rules-screen" class="screen">
         <div class="glass-card p-8 md:p-12 text-center max-w-2xl">
             <h2 class="text-4xl font-bold mb-6">遊戲規則</h2>
@@ -113,8 +113,6 @@
             <button id="play-btn" class="btn-primary text-white font-bold py-3 px-10 text-xl rounded-full mt-10">我準備好了！</button>
         </div>
     </div>
-
-    <!-- Quiz Screen -->
     <div id="quiz-screen" class="screen">
         <div class="w-full max-w-4xl">
             <div class="flex justify-between items-center mb-4">
@@ -130,8 +128,6 @@
             <div id="options-container" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
         </div>
     </div>
-
-    <!-- Score Screen -->
     <div id="score-screen" class="screen">
         <div class="glass-card p-8 md:p-12 text-center max-w-2xl">
             <h2 class="text-2xl text-gray-300">挑戰完成！</h2>
@@ -146,8 +142,6 @@
             </div>
         </div>
     </div>
-
-    <!-- Leaderboard Screen -->
     <div id="leaderboard-screen" class="screen">
         <div class="w-full max-w-4xl glass-card">
             <div class="p-6 border-b border-gray-700 flex justify-between items-center">
@@ -164,8 +158,6 @@
             </div>
         </div>
     </div>
-
-    <!-- Thank You Screen -->
     <div id="thank-you-screen" class="screen">
         <div class="text-center">
             <h2 class="text-5xl font-bold">感謝您的參與！</h2>
@@ -173,7 +165,27 @@
         </div>
     </div>
 
-    <script>
+    <!-- Firebase SDK -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-app.js";
+        import { getFirestore, collection, addDoc, query, orderBy, onSnapshot, serverTimestamp, limit } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-firestore.js";
+
+        // 【重要！】您的 Firebase 專案金鑰已更新於此
+        const firebaseConfig = {
+          apiKey: "AIzaSyBZ2uya0Tjog4blOdKv7evLWL1dB4zs3A4",
+          authDomain: "galaxy-monster-quiz.firebaseapp.com",
+          projectId: "galaxy-monster-quiz",
+          storageBucket: "galaxy-monster-quiz.appspot.com", // 已為您修正 .app -> .appspot
+          messagingSenderId: "255266989387",
+          appId: "1:255266989387:web:8083b19e62f5fb589234ce",
+          measurementId: "G-925KTHYCQE"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const leaderboardRef = collection(db, "leaderboard");
+
+        // --- 全域變數與 DOM 元素 ---
         const questions = [
             { question: "Galaxy S 系列手機的「超明亮夜拍」功能，主要解決了什麼拍照痛點？", options: ["白天照片過曝", "自拍不夠好看", "在低光源環境下拍出清晰明亮的照片", "無法拍攝超廣角照片"], answer: 2 },
             { question: "當你想將 Galaxy 手機中的照片快速傳給朋友的三星平板，應該使用哪個內建功能最方便？", options: ["SmartThings", "快速分享 (Quick Share)", "Samsung DeX", "Bixby"], answer: 1 },
@@ -186,22 +198,12 @@
             { question: "如果你想用手機統一控制家中的三星電視、冰箱和冷氣，應該使用哪個 App？", options: ["Galaxy Store", "Samsung Health", "SmartThings", "Bixby Home"], answer: 2 },
             { question: "三星為了永續發展而推動的「Galaxy for the Planet」計畫，使用了下列何種回收材料來製作部分手機元件？", options: ["回收寶特瓶", "廢棄漁網", "舊報紙", "二手輪胎"], answer: 1 }
         ];
-
         let currentQuestionIndex = 0;
         let score = 0;
         let timerInterval;
         let timeLeft = 15;
 
-        const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbyicc1D5u8AUwWeelxl0nllpuvGNI_VrPuDumur-814IgV45geq_d2V3kHsn1wNGQCaOw/exec';
-
-        const screens = {
-            start: document.getElementById('start-screen'),
-            rules: document.getElementById('rules-screen'),
-            quiz: document.getElementById('quiz-screen'),
-            score: document.getElementById('score-screen'),
-            leaderboard: document.getElementById('leaderboard-screen'),
-            thankYou: document.getElementById('thank-you-screen')
-        };
+        const screens = { start: document.getElementById('start-screen'), rules: document.getElementById('rules-screen'), quiz: document.getElementById('quiz-screen'), score: document.getElementById('score-screen'), leaderboard: document.getElementById('leaderboard-screen'), thankYou: document.getElementById('thank-you-screen') };
         const startBtn = document.getElementById('start-btn');
         const playBtn = document.getElementById('play-btn');
         const submitScoreBtn = document.getElementById('submit-score-btn');
@@ -209,7 +211,8 @@
         const phoneInput = document.getElementById('phone-input');
         const leaderboardBtn = document.getElementById('leaderboard-btn');
         const closeLeaderboardBtn = document.getElementById('close-leaderboard-btn');
-
+        
+        // --- 核心函式 ---
         function switchScreen(screenName) {
             Object.values(screens).forEach(screen => screen.classList.remove('active'));
             screens[screenName].classList.add('active');
@@ -281,7 +284,7 @@
             switchScreen('score');
         }
 
-        function saveScore() {
+        async function saveScore() {
             const nickname = nicknameInput.value.trim();
             const phone = phoneInput.value.trim();
             if (!nickname || !phone) {
@@ -290,85 +293,90 @@
             }
             submitScoreBtn.disabled = true;
             submitScoreBtn.textContent = '上傳中...';
-            
-            const data = { nickname, phone, score };
-            const queryParams = new URLSearchParams(data);
-            const requestUrl = `${WEB_APP_URL}?${queryParams.toString()}`;
-
-            // 使用 "送出即成功" 模式
-            // 我們發送請求，但不等待回應，以避免跨域問題
-            fetch(requestUrl, { mode: 'no-cors' })
-                .then(() => {
-                    console.log("資料請求已送出。");
-                })
-                .catch(error => {
-                    // 即使出錯，我們也假定它會成功，因為 no-cors 模式下本來就捕捉不到太多錯誤
-                    console.error('送出請求時發生網路錯誤 (在 no-cors 模式下是正常的):', error);
+            try {
+                await addDoc(leaderboardRef, {
+                    nickname: nickname,
+                    phone: phone,
+                    score: score,
+                    timestamp: serverTimestamp()
                 });
-
-            // 立刻切換畫面，提供流暢的使用者體驗
-            switchScreen('thankYou');
-            setTimeout(() => {
-                switchScreen('start');
-                nicknameInput.value = '';
-                phoneInput.value = '';
+                switchScreen('thankYou');
+                setTimeout(() => {
+                    switchScreen('start');
+                    nicknameInput.value = '';
+                    phoneInput.value = '';
+                    submitScoreBtn.disabled = false;
+                    submitScoreBtn.textContent = '登錄成績';
+                }, 5000);
+            } catch (error) {
+                console.error("寫入 Firestore 失敗:", error);
+                alert("成績上傳失敗，請檢查網路或聯繫管理員。");
                 submitScoreBtn.disabled = false;
                 submitScoreBtn.textContent = '登錄成績';
-            }, 5000);
+            }
         }
-        
-        function showLeaderboard() {
-            switchScreen('leaderboard');
+
+        function setupLeaderboardListener() {
+            // **FIX:** Moved variable declarations to the top of the function scope
             const leaderboardList = document.getElementById('leaderboard-list');
             const leaderboardMessage = document.getElementById('leaderboard-message');
-            leaderboardMessage.textContent = '排行榜載入中...';
-            leaderboardList.innerHTML = '';
-            leaderboardList.appendChild(leaderboardMessage);
 
-            fetch(WEB_APP_URL)
-                .then(res => {
-                    if (!res.ok) {
-                        throw new Error(`網路錯誤！狀態碼: ${res.status}`);
+            // 查詢分數最高的前 20 名
+            const q = query(leaderboardRef, orderBy("score", "desc"), orderBy("timestamp", "asc"), limit(20));
+            
+            onSnapshot(q, (querySnapshot) => {
+                leaderboardList.innerHTML = ''; // 清空舊的排行榜
+                
+                if (querySnapshot.empty) {
+                    // **FIX:** Ensure leaderboardMessage exists before trying to set its content
+                    if (leaderboardMessage) {
+                        leaderboardMessage.textContent = '目前還沒有人挑戰成功，快來搶頭香！';
+                        leaderboardList.appendChild(leaderboardMessage);
                     }
-                    return res.json();
-                })
-                .then(result => {
-                    if (result.result === 'success') {
-                        leaderboardList.innerHTML = '';
-                        if (!result.data || result.data.length === 0) {
-                            leaderboardMessage.textContent = '目前還沒有人挑戰成功，快來搶頭香！';
-                            leaderboardList.appendChild(leaderboardMessage);
-                        } else {
-                            result.data.forEach((player, index) => {
-                                const item = document.createElement('div');
-                                item.classList.add('leaderboard-item', 'text-xl', 'border-t', 'border-gray-700');
-                                if (index < 3) item.classList.add('font-bold', 'text-yellow-300');
-                                item.innerHTML = `
-                                    <span>#${index + 1}</span>
-                                    <span class="truncate">${player.nickname}</span>
-                                    <span class="text-right">${player.score}</span>
-                                `;
-                                leaderboardList.appendChild(item);
-                            });
-                        }
-                    } else {
-                        throw new Error(result.message || '後端回報無法解析排行榜資料');
+                } else {
+                    // Remove the message if it exists
+                    if (leaderboardMessage) {
+                        leaderboardMessage.remove();
                     }
-                })
-                .catch(error => {
-                    console.error("讀取排行榜失敗:", error);
-                    leaderboardList.innerHTML = '';
-                    leaderboardMessage.textContent = `讀取排行榜失敗。請檢查試算表共用權限，並確認瀏覽器 Console 沒有錯誤訊息。`;
+                    querySnapshot.forEach((doc, index) => {
+                        const player = doc.data();
+                        const item = document.createElement('div');
+                        item.classList.add('leaderboard-item', 'text-xl', 'border-t', 'border-gray-700');
+                        if (index < 3) item.classList.add('font-bold', 'text-yellow-300');
+                        item.innerHTML = `
+                            <span>#${index + 1}</span>
+                            <span class="truncate">${player.nickname}</span>
+                            <span class="text-right">${player.score}</span>
+                        `;
+                        leaderboardList.appendChild(item);
+                    });
+                }
+            }, (error) => {
+                console.error("監聽排行榜失敗:", error);
+                leaderboardList.innerHTML = '';
+                // **FIX:** Ensure leaderboardMessage exists before using it
+                if (leaderboardMessage) {
+                    leaderboardMessage.textContent = '讀取排行榜失敗，請檢查 Firestore 規則與網路連線。';
                     leaderboardList.appendChild(leaderboardMessage);
-                });
-        }
 
-        // Event Listeners
+                    // 檢查是否有索引建立的錯誤提示
+                    if(error.code === 'failed-precondition') {
+                        console.error("Firestore 索引錯誤： Firestore 需要一個複合索引來完成這個查詢。請檢查瀏覽器主控台中的錯誤訊息，裡面應該會有一個連結，點擊該連結可以直接建立所需的索引。");
+                        leaderboardMessage.innerHTML += '<br><br><small>提示：請按 F12 打開開發者工具，查看 Console 中的錯誤連結來建立索引。</small>';
+                    }
+                }
+            });
+        }
+        
+        // --- 事件監聽 ---
         startBtn.onclick = () => switchScreen('rules');
         playBtn.onclick = startGame;
         submitScoreBtn.onclick = saveScore;
-        leaderboardBtn.onclick = showLeaderboard;
+        leaderboardBtn.onclick = () => switchScreen('leaderboard');
         closeLeaderboardBtn.onclick = () => switchScreen('start');
+        
+        // 啟動排行榜即時監聽
+        setupLeaderboardListener();
 
     </script>
 </body>
