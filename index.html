@@ -10,6 +10,17 @@
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;700;900&display=swap" rel="stylesheet">
     <!-- 引入 Tone.js 音效函式庫 -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.7.77/Tone.js"></script>
+
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-925KTHYCQE"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+
+      gtag('config', 'G-925KTHYCQE');
+    </script>
+
     <style>
         html, body {
             height: 100%;
@@ -193,6 +204,8 @@
     <!-- Firebase SDK -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-app.js";
+        // **FIX: 導入 getAnalytics 和 logEvent**
+        import { getAnalytics, logEvent } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-analytics.js";
         import { getFirestore, collection, addDoc, query, orderBy, onSnapshot, serverTimestamp, limit } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-firestore.js";
 
         const firebaseConfig = {
@@ -207,29 +220,21 @@
 
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
+        // **FIX: 初始化 Analytics**
+        const analytics = getAnalytics(app);
         const leaderboardRef = collection(db, "leaderboard");
 
         // --- 最終版題庫 ---
         const questions = [
-            // 新題目 A
             { question: "三星最新的 Galaxy AI 功能中，哪一項可以讓你用 S Pen 或手指圈選畫面上任何物件，立即進行網路搜尋？", options: ["語音翻譯", "生成式相片編輯", "智慧摘要", "搜尋圈 (Circle to Search)"], answer: 3 },
-            // 保留 #2
             { question: "當你想將 Galaxy 手機中的照片快速傳給朋友的三星平板，應該使用哪個內建功能最方便？", options: ["SmartThings", "快速分享 (Quick Share)", "Samsung DeX", "Bixby"], answer: 1 },
-            // 保留 #3
             { question: "Galaxy Z Fold 系列摺疊手機在展開內頁螢幕時，最多可以同時開啟幾個應用程式視窗進行多工處理？", options: ["一個", "兩個", "三個", "四個"], answer: 2 },
-            // 保留 #4
             { question: "Galaxy Watch 上的 BioActive 感應器，不包含以下哪一項健康數據偵測？", options: ["身體組成 (BIA)", "心電圖 (ECG)", "血糖濃度", "血氧飽和度 (SpO2)"], answer: 2 },
-            // 保留 #5
             { question: "Samsung Wallet (原 Samsung Pay) 除了信用卡支付外，還整合了下列哪項便利功能？", options: ["線上購物", "悠遊卡與門禁卡", "股票下單", "繳納電費"], answer: 1 },
-            // 新題目 D
             { question: "Galaxy S 旗艦系列的相機具備強大的「AI 變焦」技術，最高可支援到幾倍的數位變焦來拍攝遠方景物？", options: ["30倍", "50倍", "100倍", "200倍"], answer: 2 },
-            // 新題目 I
             { question: "三星的 Galaxy 旗艦手機與手錶通常具備 IP68 防水防塵等級，其中數字 '8' 代表它可以在多深的水下正常運作？", options: ["0.5 公尺", "1 公尺", "1.5 公尺", "3 公尺"], answer: 2 },
-            // 新題目 S
             { question: "如果您是一位喜歡高度客製化手機介面的玩家，三星官方推出了哪一款 App，可以讓您自由調整如鎖定畫面、多工處理視窗等各種細節？", options: ["Galaxy Labs", "Good Lock", "Theme Park", "Expert RAW"], answer: 1 },
-            // 新題目 JJ
-            { question: "'Samsung' (三星) 這個名字在韓文中的意思是什麼，象徵著宏大、強大與永恆？", options: ["科技之星", "三顆星星", "未來之星", "亞洲之星"], answer: 1 },
-            // 保留 #10
+            { question: "'Samsung' (三星) 這個名字在韓文中的意思是什麼，象徵著宏大、強大與永恆？", options: ["科技之星", "三顆星星", "未来之星", "亞洲之星"], answer: 1 },
             { question: "三星為了永續發展而推動的「Galaxy for the Planet」計畫，使用了下列何種回收材料來製作部分手機元件？", options: ["回收寶特瓶", "廢棄漁網", "舊報紙", "二手輪胎"], answer: 1 }
         ];
         
@@ -249,7 +254,6 @@
         const leaderboardBtn = document.getElementById('leaderboard-btn');
         const closeLeaderboardBtn = document.getElementById('close-leaderboard-btn');
         
-        // --- 音效設定 ---
         const sounds = {
             correct: new Tone.Synth({ oscillator: { type: "sine" }, envelope: { attack: 0.01, decay: 0.2, sustain: 0.2, release: 0.2 } }).toDestination(),
             wrong: new Tone.Synth({ oscillator: { type: "square" }, envelope: { attack: 0.01, decay: 0.3, sustain: 0.1, release: 0.3 } }).toDestination(),
@@ -272,7 +276,6 @@
             }
         }
 
-        // --- 閒置計時器 ---
         function resetIdleTimer() {
             clearTimeout(idleTimer);
             if (!screens.start.classList.contains('active')) {
@@ -282,7 +285,6 @@
             }
         }
 
-        // --- 核心函式 ---
         function switchScreen(screenName) {
             Object.values(screens).forEach(screen => screen.classList.remove('active'));
             screens[screenName].classList.add('active');
@@ -290,6 +292,8 @@
         }
 
         function startGame() {
+            // **GA4 Event: game_start**
+            logEvent(analytics, 'game_start');
             currentQuestionIndex = 0;
             score = 0;
             currentPlayerDocId = null;
@@ -371,6 +375,12 @@
             submitScoreBtn.disabled = true;
             submitScoreBtn.textContent = '上傳中...';
             try {
+                // **GA4 Event: submit_score**
+                logEvent(analytics, 'submit_score', { 
+                    value: score, // GA4 會自動將 'value' 參數加總
+                    player_nickname: nickname 
+                });
+
                 const docRef = await addDoc(leaderboardRef, {
                     nickname: nickname,
                     phone: phone,
@@ -444,7 +454,6 @@
             });
         }
         
-        // --- 事件監聽 ---
         async function handleInteraction(callback) {
             if (Tone.context.state !== 'running') {
                 await Tone.start();
