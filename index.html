@@ -110,6 +110,15 @@
             background: linear-gradient(90deg, #8A2BE2, #4B0082);
             transition: width 0.1s linear;
         }
+        @keyframes countdown-pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+        .timer-danger {
+            color: #dc3545;
+            animation: countdown-pulse 1s infinite;
+        }
         .option-btn {
             transition: all 0.2s ease;
         }
@@ -128,9 +137,9 @@
         }
         .leaderboard-item {
             display: grid;
-            grid-template-columns: 1fr 4fr 2fr;
+            grid-template-columns: 1fr 4fr 2fr 1fr;
             align-items: center;
-            padding: 0.75rem 1.5rem;
+            padding: 0.75rem 1rem;
             border-radius: 0.5rem;
             transition: all 0.3s ease;
         }
@@ -138,6 +147,25 @@
             background-color: rgba(138, 43, 226, 0.3);
             border-left: 4px solid #c392ff;
             transform: scale(1.02);
+        }
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s, visibility 0.3s;
+        }
+        .modal-overlay.active {
+            opacity: 1;
+            visibility: visible;
         }
     </style>
 </head>
@@ -164,20 +192,40 @@
         </div>
     </div>
     
-    <!-- Rules Screen, Quiz Screen, etc. -->
+    <!-- Rules Screen -->
     <div id="rules-screen" class="screen">
         <div class="screen-content">
             <div class="glass-card p-6 sm:p-8 md:p-12 text-center w-full max-w-2xl">
-                <h2 class="text-3xl sm:text-4xl font-bold mb-6">遊戲規則</h2>
-                <ul class="text-lg sm:text-xl space-y-4 text-left">
-                    <li>✔️ 共 10 道關於三星 Galaxy 的知識問答。</li>
-                    <li>⏱️ 每題限時 15 秒，答題速度越快，分數越高！</li>
-                    <li>同分時，將以完成挑戰的「總花費時間」較短者排名在前。</li>
-                    <li>🏆 挑戰成功後登錄成績，即可抽10,000mAh行動電源。</li>
-                </ul>
+                <h2 class="text-3xl sm:text-4xl font-bold mb-8">遊戲規則</h2>
+                
+                <div class="space-y-6 text-left">
+                    <div class="flex items-center space-x-4">
+                        <div class="glass-card p-3 rounded-xl"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"></path></svg></div>
+                        <div>
+                            <h3 class="font-bold text-lg sm:text-xl">10道知識問答</h3>
+                            <p class="text-gray-300 text-sm sm:text-base">挑戰關於三星 Galaxy 的精彩題目。</p>
+                        </div>
+                    </div>
+                    <div class="flex items-center space-x-4">
+                        <div class="glass-card p-3 rounded-xl"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg></div>
+                        <div>
+                            <h3 class="font-bold text-lg sm:text-xl">15秒極速搶答</h3>
+                            <p class="text-gray-300 text-sm sm:text-base">速度與準確率都會影響你的分數！</p>
+                        </div>
+                    </div>
+                    <div class="flex items-center space-x-4">
+                         <div class="glass-card p-3 rounded-xl"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"></path><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"></path><path d="M4 15h1.5a2.5 2.5 0 0 1 0 5H4"></path><path d="M18 15h1.5a2.5 2.5 0 0 0 0 5H18"></path><line x1="12" y1="9" x2="12" y2="21"></line><line x1="9" y1="12" x2="15" y2="12"></line></svg></div>
+                        <div>
+                            <h3 class="font-bold text-lg sm:text-xl">總耗時決勝</h3>
+                            <p class="text-gray-300 text-sm sm:text-base">同分時，完成挑戰的總時間越短，排名越高。</p>
+                        </div>
+                    </div>
+                </div>
 
-                <div class="mt-8 text-left w-full">
-                    <h3 class="text-2xl font-bold text-yellow-300 mb-4 text-center">排行榜獎勵</h3>
+                <div class="mt-8 text-left w-full glass-card p-4 rounded-xl">
+                    <h3 class="text-2xl font-bold text-yellow-300 mb-4 text-center">活動獎勵</h3>
+                    <p class="text-lg">🏆 <span class="font-bold">參加獎：</span>登錄成績即可抽 10,000mAh 行動電源。</p>
+                    <div class="border-t border-gray-700 my-4"></div>
                     <p class="text-lg">🥇 <span class="font-bold">冠軍：</span>20,000mAh行動電源*1</p>
                     <p class="text-lg mt-2">🥈 <span class="font-bold">亞軍：</span>Snapware康寧輕瓷保溫吸管杯*1</p>
                     <p class="text-lg mt-2">🥉 <span class="font-bold">季軍：</span>放鬆筋膜槍*1</p>
@@ -187,6 +235,8 @@
             </div>
         </div>
     </div>
+    
+    <!-- Quiz Screen, Score Screen, etc. -->
     <div id="quiz-screen" class="screen">
         <div class="screen-content w-full max-w-4xl">
             <div class="w-full">
@@ -212,12 +262,14 @@
                     <p class="text-6xl sm:text-7xl font-black" id="final-score">0</p>
                     <p class="text-lg sm:text-xl">分</p>
                 </div>
+                <div id="badges-container" class="flex justify-center space-x-4 my-6"></div>
                 <div class="w-full space-y-4">
                     <input id="nickname-input" type="text" placeholder="輸入你的暱稱" class="w-full bg-transparent border-2 border-gray-500 rounded-lg py-3 px-4 text-white text-center text-lg sm:text-xl focus:border-purple-500 focus:outline-none transition">
                     <div class="relative">
                         <input id="phone-input" type="tel" placeholder="輸入電話" class="w-full bg-transparent border-2 border-gray-500 rounded-lg py-3 px-4 text-white text-center text-lg sm:text-xl focus:border-purple-500 focus:outline-none transition">
                         <small class="absolute -bottom-5 left-0 right-0 text-gray-400 text-xs">抽10,000mAh行動電源,2025/11/1於簡訊通知得獎者！</small>
                     </div>
+                    <p id="rank-prediction" class="text-yellow-400 h-6"></p>
                     <button id="submit-score-btn" class="w-full btn-primary text-white font-bold py-3 px-10 text-lg sm:text-xl rounded-lg !mt-8">登錄成績</button>
                 </div>
             </div>
@@ -230,10 +282,11 @@
                     <h2 class="text-3xl sm:text-4xl font-bold">即時排行榜</h2>
                     <button id="close-leaderboard-btn" class="text-4xl font-light text-gray-400 hover:text-white">&times;</button>
                 </div>
-                <div class="leaderboard-item text-base sm:text-lg font-bold text-gray-400">
+                <div class="leaderboard-item text-base sm:text-lg font-bold text-gray-400 !grid-cols-[1fr,4fr,2fr,1fr]">
                     <span>排名</span>
                     <span>暱稱</span>
                     <span class="text-right">分數</span>
+                    <span></span> 
                 </div>
                 <div id="leaderboard-list" class="h-[60vh] overflow-y-auto">
                      <div id="leaderboard-message" class="p-8 text-center text-gray-400 text-lg sm:text-xl">排行榜載入中...</div>
@@ -243,11 +296,33 @@
     </div>
     <div id="thank-you-screen" class="screen"></div>
 
+    <div id="replay-modal" class="modal-overlay">
+        <div class="glass-card p-8 text-center">
+            <h3 class="text-2xl font-bold mb-6">最強怪物換你當！<br>要不要再來一場？</h3>
+            <div class="flex justify-center space-x-4">
+                <button id="replay-btn" class="btn-primary text-white font-bold py-2 px-6 rounded-lg">再挑戰一次</button>
+                <button id="back-to-home-btn" class="bg-gray-600 text-white font-bold py-2 px-6 rounded-lg">返回首頁</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="share-modal" class="modal-overlay">
+        <div class="glass-card p-8 text-center max-w-sm w-full">
+            <h3 class="text-2xl font-bold mb-4">分享我的戰績</h3>
+            <p class="text-gray-300 mb-4">複製以下文字，到社群媒體上挑戰朋友吧！</p>
+            <textarea id="share-text" class="w-full bg-gray-800 text-white p-2 rounded-lg h-32" readonly></textarea>
+            <div class="flex justify-center space-x-4 mt-4">
+                <button id="copy-share-text-btn" class="btn-primary text-white font-bold py-2 px-6 rounded-lg">複製文字</button>
+                <button id="close-share-modal-btn" class="bg-gray-600 text-white font-bold py-2 px-6 rounded-lg">關閉</button>
+            </div>
+        </div>
+    </div>
+
     <!-- Firebase SDK -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-app.js";
         import { getAnalytics, logEvent } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-analytics.js";
-        import { getFirestore, collection, addDoc, query, orderBy, onSnapshot, serverTimestamp, limit } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-firestore.js";
+        import { getFirestore, collection, addDoc, query, orderBy, onSnapshot, serverTimestamp, limit, getDocs } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-firestore.js";
 
         const firebaseConfig = {
           apiKey: "AIzaSyBZ2uya0Tjog4blOdKv7evLWL1dB4zs3A4",
@@ -273,7 +348,7 @@
             { question: "Galaxy S 旗艦系列的相機具備強大的「AI 變焦」技術，最高可支援到幾倍的數位變焦來拍攝遠方景物？", options: ["30倍", "50倍", "100倍", "200倍"], answer: 2 },
             { question: "三星的 Galaxy 旗艦手機與手錶通常具備 IP68 防水防塵等級，其中數字 '8' 代表它可以在多深的水下正常運作？", options: ["0.5 公尺", "1 公尺", "1.5 公尺", "3 公尺"], answer: 2 },
             { question: "如果您是一位喜歡高度客製化手機介面的玩家，三星官方推出了哪一款 App，可以讓您自由調整如鎖定畫面、多工處理視窗等各種細節？", options: ["Galaxy Labs", "Good Lock", "Theme Park", "Expert RAW"], answer: 1 },
-            { question: "'Samsung' (三星) 這個名字在韓文中的意思是什麼，象徵著宏大、強大與永恆？", options: ["科技之星", "三顆星星", "未来之星", "亞洲之星"], answer: 1 },
+            { question: "'Samsung' (三星) 這個名字在韓文中的意思是什麼，象徵著宏大、強大與永恆？", options: ["科技之星", "三顆星星", "未來之星", "亞洲之星"], answer: 1 },
             { question: "三星為了永續發展而推動的「Galaxy for the Planet」計畫，使用了下列何種回收材料來製作部分手機元件？", options: ["回收寶特瓶", "廢棄漁網", "舊報紙", "二手輪胎"], answer: 1 }
         ];
         
@@ -283,9 +358,17 @@
         let timeLeft = 15;
         let currentPlayerDocId = null;
         let idleTimer;
-        let startTime; // 新增：遊戲開始時間
-        let totalTime; // 新增：總花費時間
+        let startTime; 
+        let totalTime;
+        let correctAnswers = 0;
+        let replayModalTimeout;
 
+        const replayModal = document.getElementById('replay-modal');
+        const replayBtn = document.getElementById('replay-btn');
+        const backToHomeBtn = document.getElementById('back-to-home-btn');
+        const shareModal = document.getElementById('share-modal');
+        const closeShareModalBtn = document.getElementById('close-share-modal-btn');
+        const copyShareTextBtn = document.getElementById('copy-share-text-btn');
         const screens = { start: document.getElementById('start-screen'), rules: document.getElementById('rules-screen'), quiz: document.getElementById('quiz-screen'), score: document.getElementById('score-screen'), leaderboard: document.getElementById('leaderboard-screen'), thankYou: document.getElementById('thank-you-screen') };
         const startBtn = document.getElementById('start-btn');
         const playBtn = document.getElementById('play-btn');
@@ -298,55 +381,42 @@
         const sounds = {
             correct: new Tone.Synth({ oscillator: { type: "sine" }, envelope: { attack: 0.01, decay: 0.2, sustain: 0.2, release: 0.2 } }).toDestination(),
             wrong: new Tone.Synth({ oscillator: { type: "square" }, envelope: { attack: 0.01, decay: 0.3, sustain: 0.1, release: 0.3 } }).toDestination(),
-            click: new Tone.MembraneSynth({ pitchDecay: 0.01, octaves: 2, envelope: { attack: 0.001, decay: 0.2, sustain: 0 } }).toDestination()
+            click: new Tone.MembraneSynth({ pitchDecay: 0.01, octaves: 2, envelope: { attack: 0.001, decay: 0.2, sustain: 0 } }).toDestination(),
+            countdown: new Tone.Synth({ oscillator: { type: "triangle" }, volume: -10, envelope: { attack: 0.01, decay: 0.1, sustain: 0, release: 0.1 } }).toDestination(),
+            scoreCount: new Tone.Synth({ oscillator: { type: "sawtooth" }, volume: -15, envelope: { attack: 0.01, decay: 0.05, sustain: 0, release: 0.1 } }).toDestination(),
+            scoreFinal: new Tone.Synth({ oscillator: { type: "triangle" }, envelope: { attack: 0.01, decay: 0.5, sustain: 0.2, release: 0.5 } }).toDestination(),
+            achievement: new Tone.PolySynth(Tone.Synth, { envelope: { attack: 0.01 } }).toDestination()
         };
 
-        function playSound(sound) {
+        function playSound(sound, note) {
             if (Tone.context.state !== 'running') return;
             switch (sound) {
-                case 'correct':
-                    sounds.correct.triggerAttackRelease("C5", "8n", Tone.now());
-                    sounds.correct.triggerAttackRelease("G5", "8n", Tone.now() + 0.1);
-                    break;
-                case 'wrong':
-                    sounds.wrong.triggerAttackRelease("C3", "4n");
-                    break;
-                case 'click':
-                    sounds.click.triggerAttackRelease("C2", "8n");
-                    break;
+                case 'correct': sounds.correct.triggerAttackRelease("C5", "8n", Tone.now()); sounds.correct.triggerAttackRelease("G5", "8n", Tone.now() + 0.1); break;
+                case 'wrong': sounds.wrong.triggerAttackRelease("C3", "4n"); break;
+                case 'click': sounds.click.triggerAttackRelease("C2", "8n"); break;
+                case 'countdown': sounds.countdown.triggerAttackRelease("G2", "16n"); break;
+                case 'scoreCount': sounds.scoreCount.triggerAttackRelease(note, "32n"); break;
+                case 'scoreFinal': sounds.scoreFinal.triggerAttackRelease("C6", "4n"); break;
+                case 'achievement': sounds.achievement.triggerAttackRelease(["C5", "E5", "G5"], "8n"); break;
             }
         }
-
-        function resetIdleTimer() {
-            clearTimeout(idleTimer);
-            if (!screens.start.classList.contains('active')) {
-                idleTimer = setTimeout(() => {
-                    switchScreen('start');
-                }, 30000);
-            }
-        }
-
-        function switchScreen(screenName) {
-            Object.values(screens).forEach(screen => screen.classList.remove('active'));
-            screens[screenName].classList.add('active');
-            resetIdleTimer();
-        }
-
+        
+        function resetIdleTimer() { clearTimeout(idleTimer); if (!screens.start.classList.contains('active')) { idleTimer = setTimeout(() => { switchScreen('start'); }, 30000); } }
+        function switchScreen(screenName) { Object.values(screens).forEach(screen => screen.classList.remove('active')); screens[screenName].classList.add('active'); resetIdleTimer(); }
+        
         function startGame() {
             logEvent(analytics, 'game_start');
-            startTime = new Date(); // **修改：記錄開始時間**
+            startTime = new Date(); 
             currentQuestionIndex = 0;
             score = 0;
+            correctAnswers = 0;
             currentPlayerDocId = null;
             showQuestion();
             switchScreen('quiz');
         }
 
         function showQuestion() {
-            if (currentQuestionIndex >= questions.length) {
-                endGame();
-                return;
-            }
+            if (currentQuestionIndex >= questions.length) { endGame(); return; }
             const questionData = questions[currentQuestionIndex];
             document.getElementById('question-counter').textContent = `Q${currentQuestionIndex + 1} / ${questions.length}`;
             document.getElementById('question-text').textContent = questionData.question;
@@ -356,29 +426,35 @@
                 const button = document.createElement('button');
                 button.textContent = option;
                 button.classList.add('option-btn', 'w-full', 'glass-card', 'p-4', 'text-lg', 'sm:text-xl', 'text-left', 'border-2', 'border-gray-600', 'hover:bg-purple-700', 'hover:border-purple-500');
-                button.onclick = () => {
-                    playSound('click');
-                    selectAnswer(index, questionData.answer);
-                };
+                button.onclick = () => { playSound('click'); selectAnswer(index, questionData.answer); };
                 optionsContainer.appendChild(button);
             });
             startTimer();
         }
 
         function startTimer() {
-            timeLeft = 15;
-            document.getElementById('timer').textContent = timeLeft;
+            const timerEl = document.getElementById('timer');
             const timerBar = document.getElementById('timer-bar');
+            timerEl.classList.remove('timer-danger');
+            timeLeft = 15;
+            timerEl.textContent = timeLeft;
             timerBar.style.width = '100%';
             clearInterval(timerInterval);
             timerInterval = setInterval(() => {
                 timeLeft -= 0.1;
                 timerBar.style.width = `${(timeLeft / 15) * 100}%`;
+                const roundedTime = Math.ceil(timeLeft);
+                if (parseInt(timerEl.textContent) !== roundedTime) {
+                     timerEl.textContent = roundedTime;
+                     if (roundedTime <= 5) {
+                        timerEl.classList.add('timer-danger');
+                        playSound('countdown');
+                     }
+                }
                 if (timeLeft <= 0) {
                     clearInterval(timerInterval);
                     selectAnswer(-1, questions[currentQuestionIndex].answer);
                 }
-                document.getElementById('timer').textContent = Math.ceil(timeLeft);
             }, 100);
         }
 
@@ -389,6 +465,7 @@
             if (selectedIndex === correctIndex) {
                 playSound('correct');
                 score += 1000 + Math.floor(timeLeft * 100);
+                correctAnswers++;
                 options[selectedIndex].classList.add('correct');
             } else {
                 playSound('wrong');
@@ -403,46 +480,101 @@
 
         function endGame() {
             const endTime = new Date();
-            totalTime = (endTime - startTime) / 1000; // **修改：計算總耗時(秒)**
-            document.getElementById('final-score').textContent = score;
+            totalTime = (endTime - startTime) / 1000;
             switchScreen('score');
+            animateScore(score);
+            showBadges();
+            getRankPrediction(score, totalTime);
         }
 
         async function saveScore() {
             const nickname = nicknameInput.value.trim();
             const phone = phoneInput.value.trim();
-            if (!nickname || !phone) {
-                alert('請務必填寫暱稱和電話！');
-                return;
-            }
+            if (!nickname || !phone) { alert('請務必填寫暱稱和電話！'); return; }
             submitScoreBtn.disabled = true;
             submitScoreBtn.textContent = '上傳中...';
             try {
-                logEvent(analytics, 'submit_score', { 
-                    value: score,
-                    player_nickname: nickname 
-                });
-
+                logEvent(analytics, 'submit_score', { value: score, player_nickname: nickname });
                 const docRef = await addDoc(leaderboardRef, {
                     nickname: nickname,
                     phone: phone,
                     score: score,
-                    totalTime: totalTime, // **修改：儲存總耗時**
+                    totalTime: totalTime,
                     timestamp: serverTimestamp()
                 });
                 currentPlayerDocId = docRef.id;
                 switchScreen('leaderboard');
-                
                 nicknameInput.value = '';
                 phoneInput.value = '';
                 submitScoreBtn.disabled = false;
                 submitScoreBtn.textContent = '登錄成績';
-
             } catch (error) {
                 console.error("寫入 Firestore 失敗:", error);
                 alert("成績上傳失敗，請檢查網路或聯繫管理員。");
                 submitScoreBtn.disabled = false;
                 submitScoreBtn.textContent = '登錄成績';
+            }
+        }
+        
+        function animateScore(finalScore) {
+            const scoreEl = document.getElementById('final-score');
+            let currentScore = 0;
+            const duration = 1500;
+            const stepTime = 50;
+            const steps = duration / stepTime;
+            const increment = finalScore > 0 ? finalScore / steps : 0;
+            const notes = ["C4", "D4", "E4", "F4", "G4", "A4", "B4", "C5"];
+            let noteIndex = 0;
+
+            const counter = setInterval(() => {
+                currentScore += increment;
+                if (currentScore >= finalScore) {
+                    currentScore = finalScore;
+                    clearInterval(counter);
+                    playSound('scoreFinal');
+                }
+                scoreEl.textContent = Math.floor(currentScore);
+                playSound('scoreCount', notes[noteIndex % notes.length]);
+                noteIndex++;
+            }, stepTime);
+        }
+
+        function showBadges() {
+            const container = document.getElementById('badges-container');
+            container.innerHTML = '';
+            let badges = [];
+            if (correctAnswers === 10) badges.push({ name: '神準射手', icon: '🎯' });
+            if (totalTime < 90) badges.push({ name: '光速快手', icon: '⚡' });
+            if (score > 20000) badges.push({ name: '知識怪物', icon: '👾' });
+            if (badges.length > 0) playSound('achievement');
+            badges.forEach(badge => {
+                const badgeEl = document.createElement('div');
+                badgeEl.className = 'glass-card flex flex-col items-center p-2 rounded-lg';
+                badgeEl.innerHTML = `<span class="text-3xl">${badge.icon}</span><span class="text-xs mt-1">${badge.name}</span>`;
+                container.appendChild(badgeEl);
+            });
+        }
+        
+        async function getRankPrediction(currentScore, currentTime) {
+            const predictionEl = document.getElementById('rank-prediction');
+            predictionEl.textContent = '正在計算排名...';
+            try {
+                const q = query(leaderboardRef, orderBy("score", "desc"), orderBy("totalTime", "asc"));
+                const snapshot = await getDocs(q);
+                let rank = 1;
+                let positionFound = false;
+                snapshot.forEach(doc => {
+                    if (positionFound) return;
+                    const player = doc.data();
+                    if (currentScore > player.score || (currentScore === player.score && currentTime < player.totalTime)) {
+                        positionFound = true;
+                    } else {
+                        rank++;
+                    }
+                });
+                predictionEl.textContent = `這個成績將可排到第 ${rank} 名！`;
+            } catch (e) {
+                predictionEl.textContent = '';
             }
         }
 
@@ -451,37 +583,47 @@
             const leaderboardMessage = document.getElementById('leaderboard-message');
             const topPlayersList = document.getElementById('top-players-list');
             const topPlayersContainer = document.getElementById('top-players-container');
-
-            // **修改：更新查詢排序邏輯**
             const q = query(leaderboardRef, orderBy("score", "desc"), orderBy("totalTime", "asc"), limit(20));
             
+            let replayTimeout;
             onSnapshot(q, (querySnapshot) => {
                 leaderboardList.innerHTML = '';
                 topPlayersList.innerHTML = '';
                 
                 if (querySnapshot.empty) {
                     leaderboardMessage.textContent = '目前還沒有人挑戰成功，快來搶頭香！';
-                    if (leaderboardList && !leaderboardList.contains(leaderboardMessage)) {
-                        leaderboardList.appendChild(leaderboardMessage);
-                    }
+                    if (leaderboardList && !leaderboardList.contains(leaderboardMessage)) leaderboardList.appendChild(leaderboardMessage);
                     topPlayersContainer.classList.add('opacity-0');
                 } else {
                     topPlayersContainer.classList.remove('opacity-0');
+                    let playerRank = -1;
                     querySnapshot.docs.forEach((doc, index) => {
                         const player = doc.data();
-
-                        // Populate the main leaderboard
                         const item = document.createElement('div');
                         item.classList.add('leaderboard-item', 'text-lg', 'sm:text-xl', 'border-t', 'border-gray-700');
                         if (index < 3) item.classList.add('font-bold', 'text-yellow-300');
+                        
+                        const rankEl = `<span>#${index + 1}</span>`;
+                        const nameEl = `<span class="truncate">${player.nickname}</span>`;
+                        const scoreEl = `<span class="text-right">${player.score}</span>`;
+                        const shareContainer = document.createElement('div');
+                        shareContainer.className = "flex justify-center items-center";
+
                         if (doc.id === currentPlayerDocId) {
                             item.classList.add('highlight-me');
+                            playerRank = index + 1;
                             setTimeout(() => item.scrollIntoView({ behavior: 'smooth', block: 'center' }), 500);
+                            const shareBtn = document.createElement('button');
+                            shareBtn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"></path><polyline points="16 6 12 2 8 6"></polyline><line x1="12" y1="2" x2="12" y2="15"></line></svg>`;
+                            shareBtn.className = 'text-gray-400 hover:text-white transition';
+                            shareBtn.onclick = (e) => { e.stopPropagation(); playSound('click'); showShareModal(playerRank, player.score); };
+                            shareContainer.appendChild(shareBtn);
                         }
-                        item.innerHTML = `<span>#${index + 1}</span><span class="truncate">${player.nickname}</span><span class="text-right">${player.score}</span>`;
+                        
+                        item.innerHTML = rankEl + nameEl + scoreEl;
+                        item.appendChild(shareContainer);
                         leaderboardList.appendChild(item);
 
-                        // Populate the top 3 snippet on the start screen
                         if (index < 3) {
                             const topPlayerItem = document.createElement('div');
                             topPlayerItem.className = 'flex justify-between items-center text-lg';
@@ -489,77 +631,125 @@
                             topPlayersList.appendChild(topPlayerItem);
                         }
                     });
-                }
-            }, (error) => {
-                console.error("監聽排行榜失敗:", error);
-                leaderboardList.innerHTML = '';
-                 if (leaderboardList && leaderboardMessage) {
-                    leaderboardMessage.textContent = '讀取排行榜失敗。';
-                    if (!leaderboardList.contains(leaderboardMessage)) leaderboardList.appendChild(leaderboardMessage);
                     
-                    // **修改：提供更明確的索引建立提示**
-                    if(error.code === 'failed-precondition') {
-                        leaderboardMessage.innerHTML = '排行榜讀取失敗。<br><br><small>請依照 Console 中的錯誤訊息，點擊連結以建立 Firestore 索引。</small>';
-                        // 在 Console 中印出完整的錯誤訊息和連結
-                        console.error("Firestore 索引錯誤： Firestore 需要一個新的複合索引來完成這個查詢。請複製以下連結並在瀏覽器中開啟，以建立所需的索引：", error.message.substring(error.message.indexOf('https://')));
+                    if (currentPlayerDocId) {
+                        clearTimeout(replayTimeout);
+                        replayTimeout = setTimeout(() => {
+                            if (screens.leaderboard.classList.contains('active')) {
+                                replayModal.classList.add('active');
+                                
+                                clearTimeout(replayModalTimeout);
+                                replayModalTimeout = setTimeout(() => {
+                                    if (replayModal.classList.contains('active')) {
+                                        replayModal.classList.remove('active');
+                                        switchScreen('start');
+                                    }
+                                }, 15000);
+                            }
+                        }, 15000);
                     }
                 }
+            }, (error) => {
+                 console.error("監聽排行榜失敗:", error);
+                 leaderboardList.innerHTML = '';
+                 if (leaderboardList && leaderboardMessage) {
+                    leaderboardMessage.textContent = '讀取排行榜失敗，請檢查 Firestore 規則與網路連線。';
+                    if (!leaderboardList.contains(leaderboardMessage)) leaderboardList.appendChild(leaderboardMessage);
+                    if(error.code === 'failed-precondition') {
+                        leaderboardMessage.innerHTML += '<br><br><small>提示：請按 F12 打開開發者工具，查看 Console 中的錯誤連結來建立索引。</small>';
+                    }
+                 }
             });
         }
         
+        function showShareModal(rank, shareScore) {
+            const shareText = document.getElementById('share-text');
+            shareText.value = `太狂了！我在三星門市的 #Galaxy怪物 挑戰賽拿到 ${shareScore} 分，全國第 ${rank} 名！快來挑戰我的紀錄！ #三星智慧館`;
+            shareModal.classList.add('active');
+        }
+
         async function handleInteraction(callback) {
             if (Tone.context.state !== 'running') await Tone.start();
             playSound('click');
             callback();
         }
 
-        startBtn.onclick = () => handleInteraction(() => {
-            currentPlayerDocId = null;
-            switchScreen('rules');
-        });
+        startBtn.onclick = () => handleInteraction(() => { currentPlayerDocId = null; switchScreen('rules'); });
         playBtn.onclick = () => handleInteraction(startGame);
         submitScoreBtn.onclick = () => handleInteraction(saveScore);
-        leaderboardBtn.onclick = () => handleInteraction(() => {
-             currentPlayerDocId = null;
-             switchScreen('leaderboard');
-        });
-        closeLeaderboardBtn.onclick = () => handleInteraction(() => {
-            currentPlayerDocId = null;
-            switchScreen('start');
-        });
+        leaderboardBtn.onclick = () => handleInteraction(() => { currentPlayerDocId = null; switchScreen('leaderboard'); });
+        closeLeaderboardBtn.onclick = () => handleInteraction(() => { currentPlayerDocId = null; switchScreen('start'); });
+        
+        replayBtn.onclick = () => { clearTimeout(replayModalTimeout); replayModal.classList.remove('active'); handleInteraction(startGame); };
+        backToHomeBtn.onclick = () => { clearTimeout(replayModalTimeout); replayModal.classList.remove('active'); handleInteraction(() => switchScreen('start')); };
+        closeShareModalBtn.onclick = () => { playSound('click'); shareModal.classList.remove('active'); };
+        copyShareTextBtn.onclick = () => {
+            playSound('click');
+            const shareText = document.getElementById('share-text');
+            shareText.select();
+            document.execCommand('copy');
+            copyShareTextBtn.textContent = '已複製!';
+            setTimeout(() => { copyShareTextBtn.textContent = '複製文字'; }, 2000);
+        };
         
         ['mousedown', 'mousemove', 'touchstart', 'keydown'].forEach(event => document.addEventListener(event, resetIdleTimer, true));
 
-        // --- 動態背景 ---
         const canvas = document.getElementById('bg-canvas');
         const ctx = canvas.getContext('2d');
         let particles = [];
+        const productShapes = [
+            (ctx) => { ctx.moveTo(0, 0); ctx.lineTo(100, 5); ctx.lineTo(95, 0); ctx.closePath(); },
+            (ctx) => { ctx.moveTo(0, 0); ctx.lineTo(50, 20); ctx.lineTo(100, 0); ctx.lineTo(100, 10); ctx.lineTo(50, 30); ctx.lineTo(0, 10); ctx.closePath(); },
+            (ctx) => { ctx.arc(20, 20, 20, 0, Math.PI * 2); ctx.arc(20, 70, 15, 0, Math.PI * 2); ctx.arc(20, 110, 15, 0, Math.PI * 2); }
+        ];
 
-        function resizeCanvas() {
-            canvas.width = window.innerWidth;
-            canvas.height = window.innerHeight;
-        }
+        function resizeCanvas() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
 
         class Particle {
             constructor() {
                 this.x = Math.random() * canvas.width;
                 this.y = Math.random() * canvas.height;
-                this.size = Math.random() * 1.5 + 0.5;
-                this.speedX = (Math.random() * 0.5 - 0.25) * 0.5;
-                this.speedY = (Math.random() * 0.5 - 0.25) * 0.5;
-                this.opacity = Math.random() * 0.5 + 0.2;
+                this.isShape = Math.random() > 0.98;
+                if (this.isShape) {
+                    this.shape = productShapes[Math.floor(Math.random() * productShapes.length)];
+                    this.scale = Math.random() * 0.1 + 0.05;
+                    this.rotation = Math.random() * Math.PI * 2;
+                    this.rotationSpeed = (Math.random() - 0.5) * 0.001;
+                } else {
+                    this.size = Math.random() * 1.5 + 0.5;
+                }
+                this.speedX = (Math.random() * 0.3 - 0.15);
+                this.speedY = (Math.random() * 0.3 - 0.15);
+                this.opacity = Math.random() * 0.1 + 0.05;
             }
             update() {
                 this.x += this.speedX;
                 this.y += this.speedY;
-                if (this.x > canvas.width || this.x < 0) this.speedX *= -1;
-                if (this.y > canvas.height || this.y < 0) this.speedY *= -1;
+                if (this.isShape) this.rotation += this.rotationSpeed;
+                if (this.x > canvas.width + 50) this.x = -50;
+                if (this.x < -50) this.x = canvas.width + 50;
+                if (this.y > canvas.height + 50) this.y = -50;
+                if (this.y < -50) this.y = canvas.height + 50;
             }
             draw() {
-                ctx.fillStyle = `rgba(255, 255, 255, ${this.opacity})`;
-                ctx.beginPath();
-                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
-                ctx.fill();
+                ctx.save();
+                ctx.translate(this.x, this.y);
+                ctx.globalAlpha = this.opacity;
+                if (this.isShape) {
+                    ctx.rotate(this.rotation);
+                    ctx.scale(this.scale, this.scale);
+                    ctx.strokeStyle = `rgba(255, 255, 255, 0.5)`;
+                    ctx.lineWidth = 3;
+                    ctx.beginPath();
+                    this.shape(ctx);
+                    ctx.stroke();
+                } else {
+                    ctx.fillStyle = `rgba(255, 255, 255, 1)`;
+                    ctx.beginPath();
+                    ctx.arc(0, 0, this.size, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+                ctx.restore();
             }
         }
 
@@ -580,16 +770,8 @@
             requestAnimationFrame(animateParticles);
         }
 
-        window.addEventListener('resize', () => {
-            resizeCanvas();
-            initParticles();
-        });
-
-        resizeCanvas();
-        initParticles();
-        animateParticles();
-        // --- 結束動態背景 ---
-
+        window.addEventListener('resize', () => { resizeCanvas(); initParticles(); });
+        resizeCanvas(); initParticles(); animateParticles();
         setupLeaderboardListener();
         resetIdleTimer();
 
