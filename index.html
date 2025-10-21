@@ -172,6 +172,7 @@
                 <ul class="text-lg sm:text-xl space-y-4 text-left">
                     <li>✔️ 共 10 道關於三星 Galaxy 的知識問答。</li>
                     <li>⏱️ 每題限時 15 秒，答題速度越快，分數越高！</li>
+                    <li>同分時，將以完成挑戰的「總花費時間」較短者排名在前。</li>
                     <li>🏆 挑戰成功後登錄成績，即可抽10,000mAh行動電源。</li>
                 </ul>
 
@@ -282,6 +283,8 @@
         let timeLeft = 15;
         let currentPlayerDocId = null;
         let idleTimer;
+        let startTime; // 新增：遊戲開始時間
+        let totalTime; // 新增：總花費時間
 
         const screens = { start: document.getElementById('start-screen'), rules: document.getElementById('rules-screen'), quiz: document.getElementById('quiz-screen'), score: document.getElementById('score-screen'), leaderboard: document.getElementById('leaderboard-screen'), thankYou: document.getElementById('thank-you-screen') };
         const startBtn = document.getElementById('start-btn');
@@ -331,6 +334,7 @@
 
         function startGame() {
             logEvent(analytics, 'game_start');
+            startTime = new Date(); // **修改：記錄開始時間**
             currentQuestionIndex = 0;
             score = 0;
             currentPlayerDocId = null;
@@ -398,6 +402,8 @@
         }
 
         function endGame() {
+            const endTime = new Date();
+            totalTime = (endTime - startTime) / 1000; // **修改：計算總耗時(秒)**
             document.getElementById('final-score').textContent = score;
             switchScreen('score');
         }
@@ -421,6 +427,7 @@
                     nickname: nickname,
                     phone: phone,
                     score: score,
+                    totalTime: totalTime, // **修改：儲存總耗時**
                     timestamp: serverTimestamp()
                 });
                 currentPlayerDocId = docRef.id;
@@ -445,7 +452,8 @@
             const topPlayersList = document.getElementById('top-players-list');
             const topPlayersContainer = document.getElementById('top-players-container');
 
-            const q = query(leaderboardRef, orderBy("score", "desc"), orderBy("timestamp", "asc"), limit(20));
+            // **修改：更新查詢排序邏輯**
+            const q = query(leaderboardRef, orderBy("score", "desc"), orderBy("totalTime", "asc"), limit(20));
             
             onSnapshot(q, (querySnapshot) => {
                 leaderboardList.innerHTML = '';
@@ -486,10 +494,14 @@
                 console.error("監聽排行榜失敗:", error);
                 leaderboardList.innerHTML = '';
                  if (leaderboardList && leaderboardMessage) {
-                    leaderboardMessage.textContent = '讀取排行榜失敗，請檢查 Firestore 規則與網路連線。';
+                    leaderboardMessage.textContent = '讀取排行榜失敗。';
                     if (!leaderboardList.contains(leaderboardMessage)) leaderboardList.appendChild(leaderboardMessage);
+                    
+                    // **修改：提供更明確的索引建立提示**
                     if(error.code === 'failed-precondition') {
-                        leaderboardMessage.innerHTML += '<br><br><small>提示：請按 F12 打開開發者工具，查看 Console 中的錯誤連結來建立索引。</small>';
+                        leaderboardMessage.innerHTML = '排行榜讀取失敗。<br><br><small>請依照 Console 中的錯誤訊息，點擊連結以建立 Firestore 索引。</small>';
+                        // 在 Console 中印出完整的錯誤訊息和連結
+                        console.error("Firestore 索引錯誤： Firestore 需要一個新的複合索引來完成這個查詢。請複製以下連結並在瀏覽器中開啟，以建立所需的索引：", error.message.substring(error.message.indexOf('https://')));
                     }
                 }
             });
