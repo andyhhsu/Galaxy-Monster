@@ -46,9 +46,9 @@
             width: 100%;
             height: 100%;
             flex-direction: column;
-            justify-content: center; /* Reverted for centering */
+            justify-content: center; /* Center content vertically first */
             align-items: center;
-            padding: 1rem;
+            padding: 1rem; /* Reduced padding for smaller screens */
             box-sizing: border-box;
             position: absolute;
             top: 0;
@@ -64,14 +64,16 @@
             align-items: center;
             width: 100%;
             max-width: 1024px;
-            /* min-height: 100%; Removed to allow natural height */
+             /* min-height: 100%; Removed to allow natural height and prevent content push */
             padding-top: 2rem;
             padding-bottom: 2rem;
+            margin: auto 0; /* Vertically center content within the scrollable area */
         }
-        /* Special handling for rules screen to ensure top is visible when scrolling */
-        #rules-screen .screen-content {
-             justify-content: flex-start;
-             padding-top: 4rem; /* Ensure space for header */
+        /* Special handling for rules screen content to ensure spacing */
+         #rules-screen .screen-content {
+             justify-content: flex-start; /* Align rules content to top */
+             margin: 0; /* Reset margin for rules screen */
+             padding-top: 4rem; /* Ensure space for header, especially on mobile */
         }
         .screen.active {
             display: flex;
@@ -347,17 +349,18 @@
         const analytics = getAnalytics(app);
         const leaderboardRef = collection(db, "leaderboard");
 
+        // --- 最終版趣味化題庫 ---
         const questions = [
-            { question: "你在滑 IG 時看到一雙超想要的球鞋，但不知道型號！這時 Galaxy AI 的哪個功能，能讓你用手指「圈一下」就立刻找到它？", options: ["語音翻譯", "生成式相片編輯", "智慧摘要", "搜尋圈 (Circle to Search)"], answer: 3 },
-            { question: "聚餐拍了張完美的團體照，朋友們都伸手要照片。這時用哪個 Galaxy 內建功能，可以像隔空投送一樣，瞬間把原圖傳給所有人的三星裝置？", options: ["SmartThings", "快速分享 (Quick Share)", "Samsung DeX", "Bixby"], answer: 1 },
-            { question: "你是個時間管理大師，用 Galaxy Z Fold 內頁大螢幕，一邊看球賽直播、一邊跟朋友聊 LINE。請問你最多還可以再開幾個 App 視窗，達成終極的一心三用？", options: ["一個", "兩個", "三個", "四個"], answer: 2 },
-            { question: "你的 Galaxy Watch 就像手腕上的健康教練，可以偵測心率、血氧、甚至身體組成。但以目前的科技，它還無法偵測下列哪一項數據？", options: ["身體組成 (BIA)", "心電圖 (ECG)", "血糖濃度", "血氧飽和度 (SpO2)"], answer: 2 },
-            { question: "你早上趕著上班忘了帶識別證，下班後又要搭捷運才發現錢包也沒帶！還好，Samsung Wallet 的哪個功能，可以讓你用手機一次搞定這兩個窘境？", options: ["整合電子發票載具", "悠遊卡與門禁卡", "線上購物網站支付", "儲存數位會員卡"], answer: 1 },
-            { question: "你去看演唱會，雖然坐在「蛋頂」，但還是想拍到偶像臉上的汗珠！這時 Galaxy S 旗艦系列的「AI 變焦」最遠可以拉到幾倍，讓你彷彿坐在第一排？", options: ["30倍", "50倍", "100倍", "200倍"], answer: 2 },
-            { question: "啊！手機不小心掉進游泳池了！還好 Galaxy 旗艦機有 IP68 防水等級，其中 '8' 代表它可以在 1.5 公尺的水深下，安全待上幾分鐘？", options: ["10 分鐘", "20 分鐘", "30 分鐘", "60 分鐘"], answer: 2 },
-            { question: "你是個手機藝術家，不滿足於預設主題，想把鎖定畫面的時鐘、App 切換的動畫都改成自己喜歡的樣子。三星官方為你準備了哪個「神級美化 App」？", options: ["Galaxy Labs", "Good Lock", "Theme Park", "Expert RAW"], answer: 1 },
-            { question: "來個品牌冷知識！'Samsung' (三星) 這個名字在韓文中的意思是什麼，象徵著宏大、強大與永恆？", options: ["科技之星", "三顆星星", "未来之星", "亞洲之星"], answer: 1 },
-            { question: "為了幫助海洋更乾淨，三星的「Galaxy for the Planet」計畫，很酷地將回收來的什麼東西，再製成手機的部分零件？", options: ["回收寶特瓶", "廢棄漁網", "舊報紙", "二手輪胎"], answer: 1 }
+            { question: "滑 IG 看到想買的東西？Galaxy AI 哪個功能讓你「圈一下」就能立刻搜尋？", options: ["語音翻譯", "生成式相片編輯", "智慧摘要", "搜尋圈 (Circle to Search)"], answer: 3 },
+            { question: "想把照片快速傳給朋友的三星手機？用哪個 Galaxy 內建功能最像隔空投送？", options: ["SmartThings", "快速分享 (Quick Share)", "Samsung DeX", "Bixby"], answer: 1 },
+            { question: "用 Galaxy Z Fold 大螢幕看影片、聊 LINE，最多還可以同時再開幾個 App？", options: ["一個", "兩個", "三個", "四個"], answer: 2 },
+            { question: "Galaxy Watch 可以偵測心率、血氧、身體組成，但無法偵測下列哪一項？", options: ["身體組成 (BIA)", "心電圖 (ECG)", "血糖濃度", "血氧飽和度 (SpO2)"], answer: 2 },
+            { question: "上班忘了帶識別證、搭捷運忘了帶錢包！Samsung Wallet 哪個功能能同時解決這兩個問題？", options: ["整合電子發票載具", "悠遊卡與門禁卡", "線上購物網站支付", "儲存數位會員卡"], answer: 1 },
+            { question: "演唱會坐太遠？Galaxy S 旗艦的「AI 變焦」最遠可以拉到幾倍，讓你像坐 VIP 區？", options: ["30倍", "50倍", "100倍", "200倍"], answer: 2 },
+            { question: "手機掉進游泳池別慌！IP68 的 '8' 代表它能在 1.5 公尺水深撐多久？", options: ["10 分鐘", "20 分鐘", "30 分鐘", "60 分鐘"], answer: 2 },
+            { question: "想徹底改造三星手機介面，從鎖定畫面到 App 動畫都要獨一無二？用哪個官方 App 能辦到？", options: ["Galaxy Labs", "Good Lock", "Theme Park", "Expert RAW"], answer: 1 },
+            { question: "冷知識！'Samsung' (三星) 在韓文中的意思是什麼？", options: ["科技之星", "三顆星星", "未来之星", "亞洲之星"], answer: 1 },
+            { question: "三星回收了什麼海洋廢棄物，把它們變成手機的一部分零件？", options: ["回收寶特瓶", "廢棄漁網", "舊報紙", "二手輪胎"], answer: 1 }
         ];
         
         const QUESTION_TIME_LIMIT = 20;
@@ -399,7 +402,6 @@
         };
 
         function playSound(sound, note) {
-            // **FIX: Only play sound if page is visible**
             if (document.visibilityState === 'hidden' || Tone.context.state !== 'running') return;
             switch (sound) {
                 case 'correct': sounds.correct.triggerAttackRelease("C5", "8n", Tone.now()); sounds.correct.triggerAttackRelease("G5", "8n", Tone.now() + 0.1); break;
@@ -459,7 +461,7 @@
                      timerEl.textContent = roundedTime;
                      if (roundedTime <= 5) {
                         timerEl.classList.add('timer-danger');
-                        playSound('countdown'); // Play sound only if visible (checked in playSound)
+                        playSound('countdown'); 
                      }
                 }
                 if (timeLeft <= 0) {
@@ -538,7 +540,6 @@
             let noteIndex = 0;
 
             const counter = setInterval(() => {
-                // **FIX: Check visibility before playing sound**
                 if (document.visibilityState === 'visible') {
                     currentScore += increment;
                     if (currentScore >= finalScore) {
@@ -550,7 +551,6 @@
                     playSound('scoreCount', notes[noteIndex % notes.length]);
                     noteIndex++;
                 } else {
-                    // If page becomes hidden during animation, jump to final score and stop
                     currentScore = finalScore;
                     scoreEl.textContent = Math.floor(currentScore);
                     clearInterval(counter);
@@ -792,17 +792,18 @@
 
         window.addEventListener('resize', () => { resizeCanvas(); initParticles(); });
 
-        // **FIX: Add visibility change listener to mute/unmute audio**
         document.addEventListener('visibilitychange', () => {
             if (document.visibilityState === 'hidden') {
                 Tone.Destination.mute = true;
-                clearTimeout(timerInterval); // Stop game timer if tab is hidden
-                clearTimeout(idleTimer); // Stop idle timer
+                clearTimeout(timerInterval);
+                clearTimeout(idleTimer);
             } else {
                 Tone.Destination.mute = false;
-                // Optionally restart timers if needed, depending on desired game behavior
-                // For now, simply unmuting is sufficient
-                resetIdleTimer(); // Restart idle timer when visible again
+                resetIdleTimer();
+                 // If the quiz screen was active when hidden, restart the timer for the current question
+                 if (screens.quiz.classList.contains('active') && currentQuestionIndex < questions.length) {
+                   startTimer(); // Restart timer logic might need adjustment based on how timeLeft was handled
+                 }
             }
         });
 
