@@ -24,7 +24,7 @@
     <style>
         html, body {
             height: 100%;
-            overflow: hidden; 
+            overflow: hidden;
         }
         body {
             font-family: 'Noto Sans TC', sans-serif;
@@ -44,9 +44,9 @@
         .screen {
             display: none;
             width: 100%;
-            height: 100%; 
+            height: 100%;
             flex-direction: column;
-            justify-content: flex-start; 
+            justify-content: flex-start;
             align-items: center;
             padding: 2rem;
             box-sizing: border-box;
@@ -55,7 +55,7 @@
             left: 0;
             transition: opacity 0.5s ease-in-out;
             animation: fadeIn 0.5s;
-            overflow-y: auto; 
+            overflow-y: auto;
         }
         .screen-content {
             display: flex;
@@ -63,8 +63,8 @@
             justify-content: center;
             align-items: center;
             width: 100%;
-            max-width: 1024px; 
-            min-height: 100%; 
+            max-width: 1024px;
+            min-height: 100%;
         }
         .screen.active {
             display: flex;
@@ -176,12 +176,13 @@
     <!-- Start Screen -->
     <div id="start-screen" class="screen active">
         <div class="screen-content text-center">
-            
+
             <h1 class="text-5xl sm:text-6xl md:text-8xl font-black tracking-wider" style="color: #c392ff;">GALAXY 怪物</h1>
-            <p class="text-xl sm:text-2xl md:text-3xl mt-4 text-gray-300">挑戰你的 Galaxy 知識魂！</p>
-            
-            <button id="start-btn" class="btn-primary text-white font-bold py-3 px-10 sm:py-4 sm:px-12 text-xl sm:text-2xl rounded-full mt-12">開始挑戰</button>
-            
+            <!-- 副標題已移除 -->
+            <!-- <p class="text-xl sm:text-2xl md:text-3xl mt-4 text-gray-300">挑戰你的 Galaxy 知識魂！</p> -->
+
+            <button id="start-btn" class="btn-primary text-white font-bold py-3 px-10 sm:py-4 sm:px-12 text-xl sm:text-2xl rounded-full mt-16">開始挑戰</button> <!-- 增加上方間距 -->
+
             <div id="top-players-container" class="glass-card w-full max-w-md p-4 my-8 opacity-0 transition-opacity duration-1000">
                 <div id="top-players-list" class="space-y-1">
                     <!-- Top players will be inserted here by JavaScript -->
@@ -191,13 +192,13 @@
             <button id="leaderboard-btn" class="block mx-auto text-lg sm:text-xl text-gray-400 hover:text-white transition">查看完整排行榜</button>
         </div>
     </div>
-    
-    <!-- Rules Screen, Quiz Screen, etc. -->
+
+    <!-- Rules Screen -->
     <div id="rules-screen" class="screen">
         <div class="screen-content">
             <div class="glass-card p-6 sm:p-8 md:p-12 text-center w-full max-w-2xl">
                 <h2 class="text-3xl sm:text-4xl font-bold mb-8">遊戲規則</h2>
-                
+
                 <div class="space-y-6 text-left">
                     <div class="flex items-center space-x-4">
                         <div class="glass-card p-3 rounded-xl"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"></path></svg></div>
@@ -209,7 +210,7 @@
                     <div class="flex items-center space-x-4">
                         <div class="glass-card p-3 rounded-xl"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg></div>
                         <div>
-                            <h3 class="font-bold text-lg sm:text-xl">15秒極速搶答</h3>
+                            <h3 class="font-bold text-lg sm:text-xl">20秒極速搶答</h3>
                             <p class="text-gray-300 text-sm sm:text-base">速度與準確率都會影響你的分數！</p>
                         </div>
                     </div>
@@ -224,7 +225,12 @@
 
                 <div class="mt-8 text-left w-full glass-card p-4 rounded-xl">
                     <h3 class="text-2xl font-bold text-yellow-300 mb-4 text-center">活動獎勵</h3>
-                    <p class="text-lg">🏆 <span class="font-bold">參加獎：</span>登錄成績即可抽 10,000mAh 行動電源。</p>
+                    <img src="https://raw.githubusercontent.com/andyhhsu/Galaxy-Monster/main/prize2.png"
+                         alt="活動獎品圖片"
+                         class="w-full max-w-sm mx-auto my-4 rounded-lg"
+                         onerror="this.onerror=null; this.src='https://placehold.co/400x300/333/ccc?text=Prize+Image+Error'">
+
+                    <p class="text-lg text-center mt-2">🏆 <span class="font-bold">參加獎：</span>登錄成績即可抽 10,000mAh 行動電源。</p>
                     <div class="border-t border-gray-700 my-4"></div>
                     <p class="text-lg">🥇 <span class="font-bold">冠軍：</span>20,000mAh行動電源*1</p>
                     <p class="text-lg mt-2">🥈 <span class="font-bold">亞軍：</span>Snapware康寧輕瓷保溫吸管杯*1</p>
@@ -235,13 +241,14 @@
             </div>
         </div>
     </div>
-    
+
+    <!-- Quiz Screen -->
     <div id="quiz-screen" class="screen">
         <div class="screen-content w-full max-w-4xl">
             <div class="w-full">
                 <div class="flex justify-between items-center mb-4">
                     <div id="question-counter" class="text-xl sm:text-2xl font-bold">Q1 / 10</div>
-                    <div id="timer" class="text-xl sm:text-2xl font-bold">15</div>
+                    <div id="timer" class="text-xl sm:text-2xl font-bold">20</div>
                 </div>
                 <div class="w-full bg-gray-700 rounded-full mb-6">
                     <div id="timer-bar" class="timer-bar rounded-full"></div>
@@ -253,6 +260,7 @@
             </div>
         </div>
     </div>
+    <!-- Score Screen -->
     <div id="score-screen" class="screen">
         <div class="screen-content">
             <div class="glass-card p-6 sm:p-8 md:p-12 text-center w-full max-w-2xl">
@@ -266,7 +274,7 @@
                     <input id="nickname-input" type="text" placeholder="輸入你的暱稱" class="w-full bg-transparent border-2 border-gray-500 rounded-lg py-3 px-4 text-white text-center text-lg sm:text-xl focus:border-purple-500 focus:outline-none transition">
                     <div class="relative">
                         <input id="phone-input" type="tel" placeholder="輸入電話" class="w-full bg-transparent border-2 border-gray-500 rounded-lg py-3 px-4 text-white text-center text-lg sm:text-xl focus:border-purple-500 focus:outline-none transition">
-                        <small class="absolute -bottom-5 left-0 right-0 text-gray-400 text-xs">抽10,000mAh行動電源,2025/11/1於簡訊通知得獎者！</small>
+                        <small class="absolute -bottom-5 left-0 right-0 text-gray-400 text-xs">抽10,000mAh行動電源,2025/12/1於簡訊通知得獎者！</small>
                     </div>
                     <p id="rank-prediction" class="text-yellow-400 h-6"></p>
                     <button id="submit-score-btn" class="w-full btn-primary text-white font-bold py-3 px-10 text-lg sm:text-xl rounded-lg !mt-8">登錄成績</button>
@@ -274,6 +282,7 @@
             </div>
         </div>
     </div>
+    <!-- Leaderboard Screen, Modals etc. -->
     <div id="leaderboard-screen" class="screen">
         <div class="screen-content">
             <div class="w-full max-w-4xl glass-card">
@@ -285,7 +294,7 @@
                     <span>排名</span>
                     <span>暱稱</span>
                     <span class="text-right">分數</span>
-                    <span></span> 
+                    <span></span>
                 </div>
                 <div id="leaderboard-list" class="h-[60vh] overflow-y-auto">
                      <div id="leaderboard-message" class="p-8 text-center text-gray-400 text-lg sm:text-xl">排行榜載入中...</div>
@@ -294,7 +303,6 @@
         </div>
     </div>
     <div id="thank-you-screen" class="screen"></div>
-
     <div id="replay-modal" class="modal-overlay">
         <div class="glass-card p-8 text-center">
             <h3 class="text-2xl font-bold mb-6">最強怪物換你當！<br>要不要再來一場？</h3>
@@ -304,7 +312,6 @@
             </div>
         </div>
     </div>
-
     <div id="share-modal" class="modal-overlay">
         <div class="glass-card p-8 text-center max-w-sm w-full">
             <h3 class="text-2xl font-bold mb-4">分享我的戰績</h3>
@@ -351,10 +358,12 @@
             { question: "為了幫助海洋更乾淨，三星的「Galaxy for the Planet」計畫，很酷地將回收來的什麼東西，再製成手機的部分零件？", options: ["回收寶特瓶", "廢棄漁網", "舊報紙", "二手輪胎"], answer: 1 }
         ];
         
+        const QUESTION_TIME_LIMIT = 20;
+
         let currentQuestionIndex = 0;
         let score = 0;
         let timerInterval;
-        let timeLeft = 15;
+        let timeLeft = QUESTION_TIME_LIMIT;
         let currentPlayerDocId = null;
         let idleTimer;
         let startTime; 
@@ -405,7 +414,7 @@
         
         function startGame() {
             logEvent(analytics, 'game_start');
-            startTime = performance.now(); // **使用高精度計時**
+            startTime = performance.now();
             currentQuestionIndex = 0;
             score = 0;
             correctAnswers = 0;
@@ -435,13 +444,13 @@
             const timerEl = document.getElementById('timer');
             const timerBar = document.getElementById('timer-bar');
             timerEl.classList.remove('timer-danger');
-            timeLeft = 15;
+            timeLeft = QUESTION_TIME_LIMIT;
             timerEl.textContent = timeLeft;
             timerBar.style.width = '100%';
             clearInterval(timerInterval);
             timerInterval = setInterval(() => {
                 timeLeft -= 0.1;
-                timerBar.style.width = `${(timeLeft / 15) * 100}%`;
+                timerBar.style.width = `${(timeLeft / QUESTION_TIME_LIMIT) * 100}%`;
                 const roundedTime = Math.ceil(timeLeft);
                 if (parseInt(timerEl.textContent) !== roundedTime) {
                      timerEl.textContent = roundedTime;
@@ -463,7 +472,7 @@
             options.forEach(btn => btn.classList.add('disabled'));
             if (selectedIndex === correctIndex) {
                 playSound('correct');
-                score += 1000 + Math.floor(timeLeft * 100);
+                score += 1000 + Math.floor(timeLeft * (1000 / QUESTION_TIME_LIMIT));
                 correctAnswers++;
                 options[selectedIndex].classList.add('correct');
             } else {
@@ -478,8 +487,8 @@
         }
 
         function endGame() {
-            const endTime = performance.now(); // **使用高精度計時**
-            totalTime = (endTime - startTime) / 1000; // 計算總耗時(秒)，會包含小數點
+            const endTime = performance.now();
+            totalTime = (endTime - startTime) / 1000;
             switchScreen('score');
             animateScore(score);
             showBadges();
@@ -543,8 +552,8 @@
             container.innerHTML = '';
             let badges = [];
             if (correctAnswers === 10) badges.push({ name: '神準射手', icon: '🎯' });
-            if (totalTime < 90) badges.push({ name: '光速快手', icon: '⚡' });
-            if (score > 20000) badges.push({ name: '知識怪物', icon: '👾' });
+            if (totalTime < 120) badges.push({ name: '光速快手', icon: '⚡' }); 
+            if (score > 25000) badges.push({ name: '知識怪物', icon: '👾' });
             if (badges.length > 0) playSound('achievement');
             badges.forEach(badge => {
                 const badgeEl = document.createElement('div');
