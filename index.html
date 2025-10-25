@@ -46,16 +46,17 @@
             width: 100%;
             height: 100%;
             flex-direction: column;
-            justify-content: flex-start;
+            /* justify-content: flex-start; */ /* Reverted for centering */
+            justify-content: center; /* Center content vertically first */
             align-items: center;
-            padding: 1rem; /* Reduced padding for smaller screens */
+            padding: 1rem;
             box-sizing: border-box;
             position: absolute;
             top: 0;
             left: 0;
             transition: opacity 0.5s ease-in-out;
             animation: fadeIn 0.5s;
-            overflow-y: auto;
+            overflow-y: auto; /* Allow scrolling if content overflows */
         }
         .screen-content {
             display: flex;
@@ -64,9 +65,14 @@
             align-items: center;
             width: 100%;
             max-width: 1024px;
-            min-height: 100%;
-            padding-top: 2rem; /* Add padding top for content */
-            padding-bottom: 2rem; /* Add padding bottom for content */
+            /* min-height: 100%; Removed to allow natural height */
+            padding-top: 2rem;
+            padding-bottom: 2rem;
+        }
+        /* Special handling for rules screen to ensure top is visible when scrolling */
+        #rules-screen .screen-content {
+             justify-content: flex-start;
+             padding-top: 4rem; /* Ensure space for header */
         }
         .screen.active {
             display: flex;
@@ -180,10 +186,9 @@
         <div class="screen-content text-center">
 
             <h1 class="text-5xl sm:text-6xl md:text-8xl font-black tracking-wider" style="color: #c392ff;">GALAXY 怪物</h1>
-            <!-- 副標題已恢復 -->
             <p class="text-xl sm:text-2xl md:text-3xl mt-4 text-gray-300">挑戰你的 Galaxy 知識魂！</p>
 
-            <button id="start-btn" class="btn-primary text-white font-bold py-3 px-10 sm:py-4 sm:px-12 text-xl sm:text-2xl rounded-full mt-12">開始挑戰</button> <!-- 調整上方間距 -->
+            <button id="start-btn" class="btn-primary text-white font-bold py-3 px-10 sm:py-4 sm:px-12 text-xl sm:text-2xl rounded-full mt-12">開始挑戰</button>
 
             <div id="top-players-container" class="glass-card w-full max-w-md p-4 my-8 opacity-0 transition-opacity duration-1000">
                 <div id="top-players-list" class="space-y-1">
@@ -197,7 +202,6 @@
 
     <!-- Rules Screen -->
     <div id="rules-screen" class="screen">
-        <!-- 修正：為 rules screen 的 screen-content 增加額外 padding -->
         <div class="screen-content pt-12 pb-8">
             <div class="glass-card p-6 sm:p-8 md:p-12 text-center w-full max-w-2xl">
                 <h2 class="text-3xl sm:text-4xl font-bold mb-8">遊戲規則</h2>
@@ -234,10 +238,11 @@
                          onerror="this.onerror=null; this.src='https://placehold.co/400x300/333/ccc?text=Prize+Image+Error'">
 
                     <p class="text-lg text-center mt-2">🏆 <span class="font-bold">參加獎：</span>登錄成績即可抽 10,000mAh 行動電源。</p>
-                    <div class="border-t border-gray-700 my-4"></div>
+                    <!-- 移除詳細文字 -->
+                    <!-- <div class="border-t border-gray-700 my-4"></div>
                     <p class="text-lg">🥇 <span class="font-bold">冠軍：</span>20,000mAh行動電源*1</p>
                     <p class="text-lg mt-2">🥈 <span class="font-bold">亞軍：</span>Snapware康寧輕瓷保溫吸管杯*1</p>
-                    <p class="text-lg mt-2">🥉 <span class="font-bold">季軍：</span>放鬆筋膜槍*1</p>
+                    <p class="text-lg mt-2">🥉 <span class="font-bold">季軍：</span>放鬆筋膜槍*1</p> -->
                 </div>
 
                 <button id="play-btn" class="btn-primary text-white font-bold py-3 px-10 text-lg sm:text-xl rounded-full mt-10">我準備好了！</button>
@@ -350,7 +355,7 @@
 
         const questions = [
             { question: "你在滑 IG 時看到一雙超想要的球鞋，但不知道型號！這時 Galaxy AI 的哪個功能，能讓你用手指「圈一下」就立刻找到它？", options: ["語音翻譯", "生成式相片編輯", "智慧摘要", "搜尋圈 (Circle to Search)"], answer: 3 },
-            { question: "聚餐拍了張完美的團體照，朋友們都伸手要照片。這時用哪個 Galaxy 內建功能，可以像隔空投送一樣，瞬間把原圖傳給所有人的三星裝置？", options: ["SmartThings", "快速分享 (Quick Share)", "Samsung DeX", "Bixby"], answer: 1 },
+            { question: "聚餐拍了張完美的團體照，朋友們都伸手要照片。這時用哪個 Galaxy 內建功能，可以像隔空投送一樣，瞬間把原圖傳給所有人的三星裝置？", options: ["SmartThings", "快速分享 (Quick Share)", "Samsung DeX", "Bby"], answer: 1 },
             { question: "你是個時間管理大師，用 Galaxy Z Fold 內頁大螢幕，一邊看球賽直播、一邊跟朋友聊 LINE。請問你最多還可以再開幾個 App 視窗，達成終極的一心三用？", options: ["一個", "兩個", "三個", "四個"], answer: 2 },
             { question: "你的 Galaxy Watch 就像手腕上的健康教練，可以偵測心率、血氧、甚至身體組成。但以目前的科技，它還無法偵測下列哪一項數據？", options: ["身體組成 (BIA)", "心電圖 (ECG)", "血糖濃度", "血氧飽和度 (SpO2)"], answer: 2 },
             { question: "你早上趕著上班忘了帶識別證，下班後又要搭捷運才發現錢包也沒帶！還好，Samsung Wallet 的哪個功能，可以讓你用手機一次搞定這兩個窘境？", options: ["線上購物", "悠遊卡與門禁卡", "股票下單", "繳納電費"], answer: 1 },
