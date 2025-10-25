@@ -46,8 +46,7 @@
             width: 100%;
             height: 100%;
             flex-direction: column;
-            /* justify-content: flex-start; */ /* Reverted for centering */
-            justify-content: center; /* Center content vertically first */
+            justify-content: center; /* Reverted for centering */
             align-items: center;
             padding: 1rem;
             box-sizing: border-box;
@@ -238,11 +237,6 @@
                          onerror="this.onerror=null; this.src='https://placehold.co/400x300/333/ccc?text=Prize+Image+Error'">
 
                     <p class="text-lg text-center mt-2">🏆 <span class="font-bold">參加獎：</span>登錄成績即可抽 10,000mAh 行動電源。</p>
-                    <!-- 移除詳細文字 -->
-                    <!-- <div class="border-t border-gray-700 my-4"></div>
-                    <p class="text-lg">🥇 <span class="font-bold">冠軍：</span>20,000mAh行動電源*1</p>
-                    <p class="text-lg mt-2">🥈 <span class="font-bold">亞軍：</span>Snapware康寧輕瓷保溫吸管杯*1</p>
-                    <p class="text-lg mt-2">🥉 <span class="font-bold">季軍：</span>放鬆筋膜槍*1</p> -->
                 </div>
 
                 <button id="play-btn" class="btn-primary text-white font-bold py-3 px-10 text-lg sm:text-xl rounded-full mt-10">我準備好了！</button>
@@ -355,10 +349,10 @@
 
         const questions = [
             { question: "你在滑 IG 時看到一雙超想要的球鞋，但不知道型號！這時 Galaxy AI 的哪個功能，能讓你用手指「圈一下」就立刻找到它？", options: ["語音翻譯", "生成式相片編輯", "智慧摘要", "搜尋圈 (Circle to Search)"], answer: 3 },
-            { question: "聚餐拍了張完美的團體照，朋友們都伸手要照片。這時用哪個 Galaxy 內建功能，可以像隔空投送一樣，瞬間把原圖傳給所有人的三星裝置？", options: ["SmartThings", "快速分享 (Quick Share)", "Samsung DeX", "Bby"], answer: 1 },
+            { question: "聚餐拍了張完美的團體照，朋友們都伸手要照片。這時用哪個 Galaxy 內建功能，可以像隔空投送一樣，瞬間把原圖傳給所有人的三星裝置？", options: ["SmartThings", "快速分享 (Quick Share)", "Samsung DeX", "Bixby"], answer: 1 },
             { question: "你是個時間管理大師，用 Galaxy Z Fold 內頁大螢幕，一邊看球賽直播、一邊跟朋友聊 LINE。請問你最多還可以再開幾個 App 視窗，達成終極的一心三用？", options: ["一個", "兩個", "三個", "四個"], answer: 2 },
             { question: "你的 Galaxy Watch 就像手腕上的健康教練，可以偵測心率、血氧、甚至身體組成。但以目前的科技，它還無法偵測下列哪一項數據？", options: ["身體組成 (BIA)", "心電圖 (ECG)", "血糖濃度", "血氧飽和度 (SpO2)"], answer: 2 },
-            { question: "你早上趕著上班忘了帶識別證，下班後又要搭捷運才發現錢包也沒帶！還好，Samsung Wallet 的哪個功能，可以讓你用手機一次搞定這兩個窘境？", options: ["線上購物", "悠遊卡與門禁卡", "股票下單", "繳納電費"], answer: 1 },
+            { question: "你早上趕著上班忘了帶識別證，下班後又要搭捷運才發現錢包也沒帶！還好，Samsung Wallet 的哪個功能，可以讓你用手機一次搞定這兩個窘境？", options: ["整合電子發票載具", "悠遊卡與門禁卡", "線上購物網站支付", "儲存數位會員卡"], answer: 1 },
             { question: "你去看演唱會，雖然坐在「蛋頂」，但還是想拍到偶像臉上的汗珠！這時 Galaxy S 旗艦系列的「AI 變焦」最遠可以拉到幾倍，讓你彷彿坐在第一排？", options: ["30倍", "50倍", "100倍", "200倍"], answer: 2 },
             { question: "啊！手機不小心掉進游泳池了！還好 Galaxy 旗艦機有 IP68 防水等級，其中 '8' 代表它可以在 1.5 公尺的水深下，安全待上幾分鐘？", options: ["10 分鐘", "20 分鐘", "30 分鐘", "60 分鐘"], answer: 2 },
             { question: "你是個手機藝術家，不滿足於預設主題，想把鎖定畫面的時鐘、App 切換的動畫都改成自己喜歡的樣子。三星官方為你準備了哪個「神級美化 App」？", options: ["Galaxy Labs", "Good Lock", "Theme Park", "Expert RAW"], answer: 1 },
@@ -405,7 +399,8 @@
         };
 
         function playSound(sound, note) {
-            if (Tone.context.state !== 'running') return;
+            // **FIX: Only play sound if page is visible**
+            if (document.visibilityState === 'hidden' || Tone.context.state !== 'running') return;
             switch (sound) {
                 case 'correct': sounds.correct.triggerAttackRelease("C5", "8n", Tone.now()); sounds.correct.triggerAttackRelease("G5", "8n", Tone.now() + 0.1); break;
                 case 'wrong': sounds.wrong.triggerAttackRelease("C3", "4n"); break;
@@ -464,7 +459,7 @@
                      timerEl.textContent = roundedTime;
                      if (roundedTime <= 5) {
                         timerEl.classList.add('timer-danger');
-                        playSound('countdown');
+                        playSound('countdown'); // Play sound only if visible (checked in playSound)
                      }
                 }
                 if (timeLeft <= 0) {
@@ -543,15 +538,23 @@
             let noteIndex = 0;
 
             const counter = setInterval(() => {
-                currentScore += increment;
-                if (currentScore >= finalScore) {
+                // **FIX: Check visibility before playing sound**
+                if (document.visibilityState === 'visible') {
+                    currentScore += increment;
+                    if (currentScore >= finalScore) {
+                        currentScore = finalScore;
+                        clearInterval(counter);
+                        playSound('scoreFinal');
+                    }
+                    scoreEl.textContent = Math.floor(currentScore);
+                    playSound('scoreCount', notes[noteIndex % notes.length]);
+                    noteIndex++;
+                } else {
+                    // If page becomes hidden during animation, jump to final score and stop
                     currentScore = finalScore;
+                    scoreEl.textContent = Math.floor(currentScore);
                     clearInterval(counter);
-                    playSound('scoreFinal');
                 }
-                scoreEl.textContent = Math.floor(currentScore);
-                playSound('scoreCount', notes[noteIndex % notes.length]);
-                noteIndex++;
             }, stepTime);
         }
 
@@ -788,6 +791,22 @@
         }
 
         window.addEventListener('resize', () => { resizeCanvas(); initParticles(); });
+
+        // **FIX: Add visibility change listener to mute/unmute audio**
+        document.addEventListener('visibilitychange', () => {
+            if (document.visibilityState === 'hidden') {
+                Tone.Destination.mute = true;
+                clearTimeout(timerInterval); // Stop game timer if tab is hidden
+                clearTimeout(idleTimer); // Stop idle timer
+            } else {
+                Tone.Destination.mute = false;
+                // Optionally restart timers if needed, depending on desired game behavior
+                // For now, simply unmuting is sufficient
+                resetIdleTimer(); // Restart idle timer when visible again
+            }
+        });
+
+
         resizeCanvas(); initParticles(); animateParticles();
         setupLeaderboardListener();
         resetIdleTimer();
