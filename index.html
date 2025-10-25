@@ -48,7 +48,7 @@
             flex-direction: column;
             justify-content: flex-start;
             align-items: center;
-            padding: 2rem;
+            padding: 1rem; /* Reduced padding for smaller screens */
             box-sizing: border-box;
             position: absolute;
             top: 0;
@@ -65,6 +65,8 @@
             width: 100%;
             max-width: 1024px;
             min-height: 100%;
+            padding-top: 2rem; /* Add padding top for content */
+            padding-bottom: 2rem; /* Add padding bottom for content */
         }
         .screen.active {
             display: flex;
@@ -178,10 +180,10 @@
         <div class="screen-content text-center">
 
             <h1 class="text-5xl sm:text-6xl md:text-8xl font-black tracking-wider" style="color: #c392ff;">GALAXY 怪物</h1>
-            <!-- 副標題已移除 -->
-            <!-- <p class="text-xl sm:text-2xl md:text-3xl mt-4 text-gray-300">挑戰你的 Galaxy 知識魂！</p> -->
+            <!-- 副標題已恢復 -->
+            <p class="text-xl sm:text-2xl md:text-3xl mt-4 text-gray-300">挑戰你的 Galaxy 知識魂！</p>
 
-            <button id="start-btn" class="btn-primary text-white font-bold py-3 px-10 sm:py-4 sm:px-12 text-xl sm:text-2xl rounded-full mt-16">開始挑戰</button> <!-- 增加上方間距 -->
+            <button id="start-btn" class="btn-primary text-white font-bold py-3 px-10 sm:py-4 sm:px-12 text-xl sm:text-2xl rounded-full mt-12">開始挑戰</button> <!-- 調整上方間距 -->
 
             <div id="top-players-container" class="glass-card w-full max-w-md p-4 my-8 opacity-0 transition-opacity duration-1000">
                 <div id="top-players-list" class="space-y-1">
@@ -195,7 +197,8 @@
 
     <!-- Rules Screen -->
     <div id="rules-screen" class="screen">
-        <div class="screen-content">
+        <!-- 修正：為 rules screen 的 screen-content 增加額外 padding -->
+        <div class="screen-content pt-12 pb-8">
             <div class="glass-card p-6 sm:p-8 md:p-12 text-center w-full max-w-2xl">
                 <h2 class="text-3xl sm:text-4xl font-bold mb-8">遊戲規則</h2>
 
