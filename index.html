@@ -186,7 +186,8 @@
     <div id="start-screen" class="screen active">
         <div class="screen-content text-center">
 
-            <h1 class="text-5xl sm:text-6xl md:text-8xl font-black tracking-wider" style="color: #c392ff;">GALAXY 怪物</h1>
+            <!-- 恢復原始標題樣式 -->
+            <h1 class="text-5xl sm:text-6xl md:text-8xl font-black tracking-wider" style="color: #c392ff;">Galaxy 怪物</h1>
             <p class="text-xl sm:text-2xl md:text-3xl mt-4 text-gray-300">挑戰你的 Galaxy 知識魂！</p>
 
             <button id="start-btn" class="btn-primary text-white font-bold py-3 px-10 sm:py-4 sm:px-12 text-xl sm:text-2xl rounded-full mt-12">開始挑戰</button>
@@ -349,7 +350,6 @@
         const analytics = getAnalytics(app);
         const leaderboardRef = collection(db, "leaderboard");
 
-        // --- 最終版趣味化題庫 ---
         const questions = [
             { question: "滑 IG 看到想買的東西？Galaxy AI 哪個功能讓你「圈一下」就能立刻搜尋？", options: ["語音翻譯", "生成式相片編輯", "智慧摘要", "搜尋圈 (Circle to Search)"], answer: 3 },
             { question: "想把照片快速傳給朋友的三星手機？用哪個 Galaxy 內建功能最像隔空投送？", options: ["SmartThings", "快速分享 (Quick Share)", "Samsung DeX", "Bixby"], answer: 1 },
@@ -688,10 +688,19 @@
         }
 
         async function handleInteraction(callback) {
-            if (Tone.context.state !== 'running') await Tone.start();
-            playSound('click');
-            callback();
+            try {
+                if (Tone.context.state !== 'running') {
+                    await Tone.start();
+                    console.log('音效已啟用');
+                }
+                playSound('click');
+                callback();
+            } catch (error) {
+                 console.error("無法啟動音效:", error);
+                 callback();
+            }
         }
+
 
         startBtn.onclick = () => handleInteraction(() => { currentPlayerDocId = null; switchScreen('rules'); });
         playBtn.onclick = () => handleInteraction(startGame);
@@ -800,9 +809,8 @@
             } else {
                 Tone.Destination.mute = false;
                 resetIdleTimer();
-                 // If the quiz screen was active when hidden, restart the timer for the current question
-                 if (screens.quiz.classList.contains('active') && currentQuestionIndex < questions.length) {
-                   startTimer(); // Restart timer logic might need adjustment based on how timeLeft was handled
+                 if (screens.quiz.classList.contains('active') && currentQuestionIndex < questions.length && timeLeft > 0) { // Check if timer was running
+                   startTimer(); 
                  }
             }
         });
