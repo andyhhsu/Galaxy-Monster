@@ -82,6 +82,7 @@
             from { opacity: 0; }
             to { opacity: 1; }
         }
+        /* 恢復為紫色光暈 */
         @keyframes pulse {
             0%, 100% {
                 box-shadow: 0 0 10px rgba(195, 146, 255, 0.4), 0 0 20px rgba(195, 146, 255, 0.3);
@@ -187,7 +188,7 @@
         <div class="screen-content text-center">
 
             <!-- 恢復原始標題樣式 -->
-            <h1 class="text-5xl sm:text-6xl md:text-8xl font-black tracking-wider" style="color: #c392ff;">Galaxy 怪物</h1>
+            <h1 class="text-5xl sm:text-6xl md:text-8xl font-black tracking-wider" style="color: #c392ff;">Galaxy 怪物 <span class="text-4xl sm:text-5xl md:text-7xl">🎃</span></h1>
             <p class="text-xl sm:text-2xl md:text-3xl mt-4 text-gray-300">挑戰你的 Galaxy 知識魂！</p>
 
             <button id="start-btn" class="btn-primary text-white font-bold py-3 px-10 sm:py-4 sm:px-12 text-xl sm:text-2xl rounded-full mt-12">開始挑戰</button>
@@ -646,6 +647,7 @@
                         if (index < 3) {
                             const topPlayerItem = document.createElement('div');
                             topPlayerItem.className = 'flex justify-between items-center text-lg';
+                            // 恢復為黃色
                             topPlayerItem.innerHTML = `<span class="font-bold text-yellow-400">#${index + 1} ${player.nickname}</span> <span class="text-gray-300">${player.score}分</span>`;
                             topPlayersList.appendChild(topPlayerItem);
                         }
