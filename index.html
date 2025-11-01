@@ -82,7 +82,6 @@
             from { opacity: 0; }
             to { opacity: 1; }
         }
-        /* 恢復為紫色光暈 */
         @keyframes pulse {
             0%, 100% {
                 box-shadow: 0 0 10px rgba(195, 146, 255, 0.4), 0 0 20px rgba(195, 146, 255, 0.3);
@@ -187,7 +186,6 @@
     <div id="start-screen" class="screen active">
         <div class="screen-content text-center">
 
-            <!-- 恢復原始標題樣式 -->
             <h1 class="text-5xl sm:text-6xl md:text-8xl font-black tracking-wider" style="color: #c392ff;">Galaxy 怪物 <span class="text-4xl sm:text-5xl md:text-7xl">🎃</span></h1>
             <p class="text-xl sm:text-2xl md:text-3xl mt-4 text-gray-300">挑戰你的 Galaxy 知識魂！</p>
 
@@ -213,8 +211,8 @@
                     <div class="flex items-center space-x-4">
                         <div class="glass-card p-3 rounded-xl"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"></path></svg></div>
                         <div>
-                            <h3 class="font-bold text-lg sm:text-xl">10道知識問答</h3>
-                            <p class="text-gray-300 text-sm sm:text-base">挑戰關於三星 Galaxy 的精彩題目。</p>
+                            <h3 class="font-bold text-lg sm:text-xl">10 題知識問答</h3>
+                            <p class="text-gray-300 text-sm sm:text-base">挑戰 10 道關於三星 Galaxy 的精彩題目。</p>
                         </div>
                     </div>
                     <div class="flex items-center space-x-4">
@@ -222,6 +220,14 @@
                         <div>
                             <h3 class="font-bold text-lg sm:text-xl">20秒極速搶答</h3>
                             <p class="text-gray-300 text-sm sm:text-base">速度與準確率都會影響你的分數！</p>
+                        </div>
+                    </div>
+                    <!-- 新增：雙重挑戰模式規則 -->
+                    <div class="flex items-center space-x-4">
+                         <div class="glass-card p-3 rounded-xl"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 3.7a2 2 0 0 1 2 2v12.6a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V5.7a2 2 0 0 1 2-2H8"/><path d="M12 20v-4"/><path d="m12 8-2 2 2 2 2-2-2-2z"/></svg></div>
+                        <div>
+                            <h3 class="font-bold text-lg sm:text-xl">雙重挑戰模式</h3>
+                            <p class="text-gray-300 text-sm sm:text-base">完成 10 題後，可選擇登錄抽獎，或繼續挑戰衝擊排行榜！</p>
                         </div>
                     </div>
                     <div class="flex items-center space-x-4">
@@ -266,6 +272,29 @@
             </div>
         </div>
     </div>
+    
+    <!-- 10 題挑戰完成分流畫面 -->
+    <div id="milestone-screen" class="screen">
+        <div class="screen-content">
+            <div class="glass-card p-6 sm:p-8 md:p-12 text-center w-full max-w-2xl">
+                <h2 class="text-3xl sm:text-4xl font-bold text-yellow-300">10 題挑戰完成！</h2>
+                <p class="text-xl mt-4">您已成功獲得「參加獎」抽獎資格！</p>
+                <p class="text-lg text-gray-300 mt-2">您的目前分數：<span id="milestone-score" class="font-bold">0</span></p>
+
+                <div class="mt-8 grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <button id="log-score-btn" class="bg-gray-600 text-white font-bold py-4 px-6 rounded-lg">
+                        登錄成績 (參加抽獎)
+                        <span class="block text-sm font-normal">先這樣就好，我要抽獎！</span>
+                    </button>
+                    <button id="continue-challenge-btn" class="btn-primary text-white font-bold py-4 px-6 rounded-lg">
+                        繼續挑戰排行榜
+                        <span class="block text-sm font-normal">我要挑戰怪物級分數！</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Score Screen -->
     <div id="score-screen" class="screen">
         <div class="screen-content">
@@ -334,7 +363,7 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-app.js";
         import { getAnalytics, logEvent } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-analytics.js";
-        import { getFirestore, collection, addDoc, query, orderBy, onSnapshot, serverTimestamp, limit, getDocs } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-firestore.js";
+        import { getFirestore, collection, addDoc, query, orderBy, onSnapshot, serverTimestamp, getDocs } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-firestore.js"; 
 
         const firebaseConfig = {
           apiKey: "AIzaSyBZ2uya0Tjog4blOdKv7evLWL1dB4zs3A4",
@@ -364,6 +393,7 @@
             { question: "三星回收了什麼海洋廢棄物，把它們變成手機的一部分零件？", options: ["回收寶特瓶", "廢棄漁網", "舊報紙", "二手輪胎"], answer: 1 }
         ];
         
+        let shuffledQuestions = [];
         const QUESTION_TIME_LIMIT = 20;
 
         let currentQuestionIndex = 0;
@@ -383,7 +413,15 @@
         const shareModal = document.getElementById('share-modal');
         const closeShareModalBtn = document.getElementById('close-share-modal-btn');
         const copyShareTextBtn = document.getElementById('copy-share-text-btn');
-        const screens = { start: document.getElementById('start-screen'), rules: document.getElementById('rules-screen'), quiz: document.getElementById('quiz-screen'), score: document.getElementById('score-screen'), leaderboard: document.getElementById('leaderboard-screen'), thankYou: document.getElementById('thank-you-screen') };
+        const screens = { 
+            start: document.getElementById('start-screen'), 
+            rules: document.getElementById('rules-screen'), 
+            quiz: document.getElementById('quiz-screen'), 
+            milestone: document.getElementById('milestone-screen'),
+            score: document.getElementById('score-screen'), 
+            leaderboard: document.getElementById('leaderboard-screen'), 
+            thankYou: document.getElementById('thank-you-screen') 
+        };
         const startBtn = document.getElementById('start-btn');
         const playBtn = document.getElementById('play-btn');
         const submitScoreBtn = document.getElementById('submit-score-btn');
@@ -391,6 +429,8 @@
         const phoneInput = document.getElementById('phone-input');
         const leaderboardBtn = document.getElementById('leaderboard-btn');
         const closeLeaderboardBtn = document.getElementById('close-leaderboard-btn');
+        const logScoreBtn = document.getElementById('log-score-btn');
+        const continueChallengeBtn = document.getElementById('continue-challenge-btn');
         
         const sounds = {
             correct: new Tone.Synth({ oscillator: { type: "sine" }, envelope: { attack: 0.01, decay: 0.2, sustain: 0.2, release: 0.2 } }).toDestination(),
@@ -418,6 +458,10 @@
         function resetIdleTimer() { clearTimeout(idleTimer); if (!screens.start.classList.contains('active')) { idleTimer = setTimeout(() => { switchScreen('start'); }, 30000); } }
         function switchScreen(screenName) { Object.values(screens).forEach(screen => screen.classList.remove('active')); screens[screenName].classList.add('active'); resetIdleTimer(); }
         
+        function shuffleQuestions() {
+            shuffledQuestions = [...questions].sort(() => Math.random() - 0.5);
+        }
+
         function startGame() {
             logEvent(analytics, 'game_start');
             startTime = performance.now();
@@ -425,14 +469,19 @@
             score = 0;
             correctAnswers = 0;
             currentPlayerDocId = null;
+            shuffleQuestions();
             showQuestion();
             switchScreen('quiz');
         }
 
         function showQuestion() {
-            if (currentQuestionIndex >= questions.length) { endGame(); return; }
-            const questionData = questions[currentQuestionIndex];
-            document.getElementById('question-counter').textContent = `Q${currentQuestionIndex + 1} / ${questions.length}`;
+            if (currentQuestionIndex % questions.length === 0 && currentQuestionIndex > 0) {
+                shuffleQuestions();
+            }
+            const qIndex = currentQuestionIndex % questions.length;
+            const questionData = shuffledQuestions[qIndex];
+            
+            document.getElementById('question-counter').textContent = `Q${currentQuestionIndex + 1}`;
             document.getElementById('question-text').textContent = questionData.question;
             const optionsContainer = document.getElementById('options-container');
             optionsContainer.innerHTML = '';
@@ -476,7 +525,9 @@
             clearInterval(timerInterval);
             const options = document.querySelectorAll('.option-btn');
             options.forEach(btn => btn.classList.add('disabled'));
-            if (selectedIndex === correctIndex) {
+            let isCorrect = (selectedIndex === correctIndex);
+
+            if (isCorrect) {
                 playSound('correct');
                 score += 1000 + Math.floor(timeLeft * (1000 / QUESTION_TIME_LIMIT));
                 correctAnswers++;
@@ -486,9 +537,22 @@
                 if (selectedIndex !== -1) options[selectedIndex].classList.add('wrong');
                 options[correctIndex].classList.add('correct');
             }
+            
+            // **MODIFIED LOGIC: This timeout runs regardless of right/wrong for the first 10 questions**
             setTimeout(() => {
-                currentQuestionIndex++;
-                showQuestion();
+                currentQuestionIndex++; 
+
+                if (currentQuestionIndex === 10) {
+                    // Just completed the 10th question (whether right or wrong)
+                    document.getElementById('milestone-score').textContent = score;
+                    switchScreen('milestone');
+                } else if (currentQuestionIndex > 10 && !isCorrect) {
+                    // In unlimited mode (past Q10) AND got a wrong answer -> End Game
+                    endGame();
+                } else {
+                    // In Q1-9 (right or wrong) OR in unlimited mode and got it right -> Continue
+                    showQuestion();
+                }
             }, 1500);
         }
 
@@ -563,8 +627,8 @@
             const container = document.getElementById('badges-container');
             container.innerHTML = '';
             let badges = [];
-            if (correctAnswers === 10) badges.push({ name: '神準射手', icon: '🎯' });
-            if (totalTime < 120) badges.push({ name: '光速快手', icon: '⚡' }); 
+            if (correctAnswers >= 10) badges.push({ name: '神準射手', icon: '🎯' }); // 10 題答對
+            if (totalTime < 120 && correctAnswers >= 10) badges.push({ name: '光速快手', icon: '⚡' }); 
             if (score > 25000) badges.push({ name: '知識怪物', icon: '👾' });
             if (badges.length > 0) playSound('achievement');
             badges.forEach(badge => {
@@ -603,7 +667,7 @@
             const leaderboardMessage = document.getElementById('leaderboard-message');
             const topPlayersList = document.getElementById('top-players-list');
             const topPlayersContainer = document.getElementById('top-players-container');
-            const q = query(leaderboardRef, orderBy("score", "desc"), orderBy("totalTime", "asc"), limit(20));
+            const q = query(leaderboardRef, orderBy("score", "desc"), orderBy("totalTime", "asc")); 
             
             let replayTimeout;
             onSnapshot(q, (querySnapshot) => {
@@ -621,7 +685,7 @@
                         const player = doc.data();
                         const item = document.createElement('div');
                         item.classList.add('leaderboard-item', 'text-lg', 'sm:text-xl', 'border-t', 'border-gray-700');
-                        if (index < 3) item.classList.add('font-bold', 'text-yellow-300');
+                        if (index < 3) item.classList.add('font-bold', 'text-yellow-400'); 
                         
                         const rankEl = `<span>#${index + 1}</span>`;
                         const nameEl = `<span class="truncate">${player.nickname}</span>`;
@@ -647,7 +711,6 @@
                         if (index < 3) {
                             const topPlayerItem = document.createElement('div');
                             topPlayerItem.className = 'flex justify-between items-center text-lg';
-                            // 恢復為黃色
                             topPlayerItem.innerHTML = `<span class="font-bold text-yellow-400">#${index + 1} ${player.nickname}</span> <span class="text-gray-300">${player.score}分</span>`;
                             topPlayersList.appendChild(topPlayerItem);
                         }
@@ -710,6 +773,12 @@
         leaderboardBtn.onclick = () => handleInteraction(() => { currentPlayerDocId = null; switchScreen('leaderboard'); });
         closeLeaderboardBtn.onclick = () => handleInteraction(() => { currentPlayerDocId = null; switchScreen('start'); });
         
+        logScoreBtn.onclick = () => handleInteraction(endGame);
+        continueChallengeBtn.onclick = () => handleInteraction(() => {
+            showQuestion();
+            switchScreen('quiz');
+        });
+
         replayBtn.onclick = () => { clearTimeout(replayModalTimeout); replayModal.classList.remove('active'); handleInteraction(startGame); };
         backToHomeBtn.onclick = () => { clearTimeout(replayModalTimeout); replayModal.classList.remove('active'); handleInteraction(() => switchScreen('start')); };
         closeShareModalBtn.onclick = () => { playSound('click'); shareModal.classList.remove('active'); };
