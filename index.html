@@ -146,17 +146,14 @@
         }
         .leaderboard-item {
             display: grid;
-            grid-template-columns: 1fr 4fr 2fr 1fr;
+            /* 恢復為 3 欄 */
+            grid-template-columns: 1fr 4fr 2fr;
             align-items: center;
             padding: 0.75rem 1rem;
             border-radius: 0.5rem;
             transition: all 0.3s ease;
         }
-        .highlight-me {
-            background-color: rgba(138, 43, 226, 0.3);
-            border-left: 4px solid #c392ff;
-            transform: scale(1.02);
-        }
+        /* 移除高亮樣式 */
         .modal-overlay {
             position: fixed;
             top: 0;
@@ -186,6 +183,7 @@
     <div id="start-screen" class="screen active">
         <div class="screen-content text-center">
 
+            <!-- 恢復南瓜圖示 -->
             <h1 class="text-5xl sm:text-6xl md:text-8xl font-black tracking-wider" style="color: #c392ff;">Galaxy 怪物 <span class="text-4xl sm:text-5xl md:text-7xl">🎃</span></h1>
             <p class="text-xl sm:text-2xl md:text-3xl mt-4 text-gray-300">挑戰你的 Galaxy 知識魂！</p>
 
@@ -222,7 +220,6 @@
                             <p class="text-gray-300 text-sm sm:text-base">速度與準確率都會影響你的分數！</p>
                         </div>
                     </div>
-                    <!-- 新增：雙重挑戰模式規則 -->
                     <div class="flex items-center space-x-4">
                          <div class="glass-card p-3 rounded-xl"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 3.7a2 2 0 0 1 2 2v12.6a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V5.7a2 2 0 0 1 2-2H8"/><path d="M12 20v-4"/><path d="m12 8-2 2 2 2 2-2-2-2z"/></svg></div>
                         <div>
@@ -311,7 +308,8 @@
                         <input id="phone-input" type="tel" placeholder="輸入電話" class="w-full bg-transparent border-2 border-gray-500 rounded-lg py-3 px-4 text-white text-center text-lg sm:text-xl focus:border-purple-500 focus:outline-none transition">
                         <small class="absolute -bottom-5 left-0 right-0 text-gray-400 text-xs">抽10,000mAh行動電源,2025/12/1於簡訊通知得獎者！</small>
                     </div>
-                    <p id="rank-prediction" class="text-yellow-400 h-6"></p>
+                    <!-- 移除排名預測 -->
+                    <!-- <p id="rank-prediction" class="text-yellow-400 h-6"></p> -->
                     <button id="submit-score-btn" class="w-full btn-primary text-white font-bold py-3 px-10 text-lg sm:text-xl rounded-lg !mt-8">登錄成績</button>
                 </div>
             </div>
@@ -322,14 +320,14 @@
         <div class="screen-content">
             <div class="w-full max-w-4xl glass-card">
                 <div class="p-6 border-b border-gray-700 flex justify-between items-center">
-                    <h2 class="text-3xl sm:text-4xl font-bold">即時排行榜</h2>
+                    <h2 class="text-3xl sm:text-4xl font-bold">即時排行榜</h2> <!-- 移除 Top 50 -->
                     <button id="close-leaderboard-btn" class="text-4xl font-light text-gray-400 hover:text-white">&times;</button>
                 </div>
-                <div class="leaderboard-item text-base sm:text-lg font-bold text-gray-400 !grid-cols-[1fr,4fr,2fr,1fr]">
+                <!-- 恢復 3 欄 -->
+                <div class="leaderboard-item text-base sm:text-lg font-bold text-gray-400 !grid-cols-[1fr,4fr,2fr]">
                     <span>排名</span>
                     <span>暱稱</span>
                     <span class="text-right">分數</span>
-                    <span></span>
                 </div>
                 <div id="leaderboard-list" class="h-[60vh] overflow-y-auto">
                      <div id="leaderboard-message" class="p-8 text-center text-gray-400 text-lg sm:text-xl">排行榜載入中...</div>
@@ -337,33 +335,27 @@
             </div>
         </div>
     </div>
-    <div id="thank-you-screen" class="screen"></div>
-    <div id="replay-modal" class="modal-overlay">
-        <div class="glass-card p-8 text-center">
-            <h3 class="text-2xl font-bold mb-6">最強怪物換你當！<br>要不要再來一場？</h3>
-            <div class="flex justify-center space-x-4">
-                <button id="replay-btn" class="btn-primary text-white font-bold py-2 px-6 rounded-lg">再挑戰一次</button>
-                <button id="back-to-home-btn" class="bg-gray-600 text-white font-bold py-2 px-6 rounded-lg">返回首頁</button>
-            </div>
+    <!-- 感謝頁面，用於登錄後跳轉 -->
+    <div id="thank-you-screen" class="screen">
+        <div class="screen-content text-center">
+            <h2 class="text-5xl font-bold">感謝您的參與！</h2>
+            <p class="text-2xl mt-4 text-gray-300">您的成績已成功登錄。</p>
+            <p class="text-lg mt-4 text-gray-400">即將返回首頁...</p>
         </div>
     </div>
-    <div id="share-modal" class="modal-overlay">
-        <div class="glass-card p-8 text-center max-w-sm w-full">
-            <h3 class="text-2xl font-bold mb-4">分享我的戰績</h3>
-            <p class="text-gray-300 mb-4">複製以下文字，到社群媒體上挑戰朋友吧！</p>
-            <textarea id="share-text" class="w-full bg-gray-800 text-white p-2 rounded-lg h-32" readonly></textarea>
-            <div class="flex justify-center space-x-4 mt-4">
-                <button id="copy-share-text-btn" class="btn-primary text-white font-bold py-2 px-6 rounded-lg">複製文字</button>
-                <button id="close-share-modal-btn" class="bg-gray-600 text-white font-bold py-2 px-6 rounded-lg">關閉</button>
-            </div>
-        </div>
-    </div>
+    
+    <!-- 移除 Replay 和 Share Modals -->
+    <!-- 
+    <div id="replay-modal" ...> ... </div>
+    <div id="share-modal" ...> ... </div>
+    -->
 
     <!-- Firebase SDK -->
     <script type="module">
+        // **FIX: 重新匯入 onSnapshot**
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-app.js";
         import { getAnalytics, logEvent } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-analytics.js";
-        import { getFirestore, collection, addDoc, query, orderBy, onSnapshot, serverTimestamp, getDocs } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-firestore.js"; 
+        import { getFirestore, collection, addDoc, query, orderBy, onSnapshot, serverTimestamp, getDocs, limit } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-firestore.js"; 
 
         const firebaseConfig = {
           apiKey: "AIzaSyBZ2uya0Tjog4blOdKv7evLWL1dB4zs3A4",
@@ -400,19 +392,14 @@
         let score = 0;
         let timerInterval;
         let timeLeft = QUESTION_TIME_LIMIT;
-        let currentPlayerDocId = null;
+        // let currentPlayerDocId = null; // 移除
         let idleTimer;
         let startTime; 
         let totalTime;
         let correctAnswers = 0;
-        let replayModalTimeout;
+        // let replayModalTimeout; // 移除
 
-        const replayModal = document.getElementById('replay-modal');
-        const replayBtn = document.getElementById('replay-btn');
-        const backToHomeBtn = document.getElementById('back-to-home-btn');
-        const shareModal = document.getElementById('share-modal');
-        const closeShareModalBtn = document.getElementById('close-share-modal-btn');
-        const copyShareTextBtn = document.getElementById('copy-share-text-btn');
+        // 移除 Modal 相關變數
         const screens = { 
             start: document.getElementById('start-screen'), 
             rules: document.getElementById('rules-screen'), 
@@ -468,7 +455,7 @@
             currentQuestionIndex = 0;
             score = 0;
             correctAnswers = 0;
-            currentPlayerDocId = null;
+            // currentPlayerDocId = null; // 移除
             shuffleQuestions();
             showQuestion();
             switchScreen('quiz');
@@ -538,19 +525,15 @@
                 options[correctIndex].classList.add('correct');
             }
             
-            // **MODIFIED LOGIC: This timeout runs regardless of right/wrong for the first 10 questions**
             setTimeout(() => {
                 currentQuestionIndex++; 
 
                 if (currentQuestionIndex === 10) {
-                    // Just completed the 10th question (whether right or wrong)
                     document.getElementById('milestone-score').textContent = score;
                     switchScreen('milestone');
                 } else if (currentQuestionIndex > 10 && !isCorrect) {
-                    // In unlimited mode (past Q10) AND got a wrong answer -> End Game
                     endGame();
                 } else {
-                    // In Q1-9 (right or wrong) OR in unlimited mode and got it right -> Continue
                     showQuestion();
                 }
             }, 1500);
@@ -562,7 +545,8 @@
             switchScreen('score');
             animateScore(score);
             showBadges();
-            getRankPrediction(score, totalTime);
+            // 移除排名預測
+            // getRankPrediction(score, totalTime); 
         }
 
         async function saveScore() {
@@ -580,12 +564,19 @@
                     totalTime: totalTime,
                     timestamp: serverTimestamp()
                 });
-                currentPlayerDocId = docRef.id;
-                switchScreen('leaderboard');
+                // currentPlayerDocId = docRef.id; // 移除
+                
+                // **修改：改為跳轉到感謝頁面**
+                switchScreen('thankYou');
+                setTimeout(() => {
+                    switchScreen('start');
+                }, 5000); // 5秒後自動返回首頁
+                
                 nicknameInput.value = '';
                 phoneInput.value = '';
                 submitScoreBtn.disabled = false;
                 submitScoreBtn.textContent = '登錄成績';
+
             } catch (error) {
                 console.error("寫入 Firestore 失敗:", error);
                 alert("成績上傳失敗，請檢查網路或聯繫管理員。");
@@ -627,7 +618,7 @@
             const container = document.getElementById('badges-container');
             container.innerHTML = '';
             let badges = [];
-            if (correctAnswers >= 10) badges.push({ name: '神準射手', icon: '🎯' }); // 10 題答對
+            if (correctAnswers >= 10) badges.push({ name: '神準射手', icon: '🎯' }); 
             if (totalTime < 120 && correctAnswers >= 10) badges.push({ name: '光速快手', icon: '⚡' }); 
             if (score > 25000) badges.push({ name: '知識怪物', icon: '👾' });
             if (badges.length > 0) playSound('achievement');
@@ -639,118 +630,93 @@
             });
         }
         
-        async function getRankPrediction(currentScore, currentTime) {
-            const predictionEl = document.getElementById('rank-prediction');
-            predictionEl.textContent = '正在計算排名...';
-            try {
-                const q = query(leaderboardRef, orderBy("score", "desc"), orderBy("totalTime", "asc"));
-                const snapshot = await getDocs(q);
-                let rank = 1;
-                let positionFound = false;
-                snapshot.forEach(doc => {
-                    if (positionFound) return;
-                    const player = doc.data();
-                    if (currentScore > player.score || (currentScore === player.score && currentTime < player.totalTime)) {
-                        positionFound = true;
-                    } else {
-                        rank++;
-                    }
-                });
-                predictionEl.textContent = `這個成績將可排到第 ${rank} 名！`;
-            } catch (e) {
-                predictionEl.textContent = '';
-            }
-        }
+        // **移除 getRankPrediction 函式**
 
+        // **修改：setupLeaderboardListener 只處理 Top 3**
         function setupLeaderboardListener() {
-            const leaderboardList = document.getElementById('leaderboard-list');
-            const leaderboardMessage = document.getElementById('leaderboard-message');
             const topPlayersList = document.getElementById('top-players-list');
             const topPlayersContainer = document.getElementById('top-players-container');
-            const q = query(leaderboardRef, orderBy("score", "desc"), orderBy("totalTime", "asc")); 
+            const qTop3 = query(leaderboardRef, orderBy("score", "desc"), orderBy("totalTime", "asc"), limit(3)); 
             
-            let replayTimeout;
-            onSnapshot(q, (querySnapshot) => {
-                leaderboardList.innerHTML = '';
+            onSnapshot(qTop3, (querySnapshot) => {
                 topPlayersList.innerHTML = '';
                 
                 if (querySnapshot.empty) {
-                    leaderboardMessage.textContent = '目前還沒有人挑戰成功，快來搶頭香！';
-                    if (leaderboardList && !leaderboardList.contains(leaderboardMessage)) leaderboardList.appendChild(leaderboardMessage);
                     topPlayersContainer.classList.add('opacity-0');
                 } else {
                     topPlayersContainer.classList.remove('opacity-0');
-                    let playerRank = -1;
                     querySnapshot.docs.forEach((doc, index) => {
                         const player = doc.data();
-                        const item = document.createElement('div');
-                        item.classList.add('leaderboard-item', 'text-lg', 'sm:text-xl', 'border-t', 'border-gray-700');
-                        if (index < 3) item.classList.add('font-bold', 'text-yellow-400'); 
-                        
-                        const rankEl = `<span>#${index + 1}</span>`;
-                        const nameEl = `<span class="truncate">${player.nickname}</span>`;
-                        const scoreEl = `<span class="text-right">${player.score}</span>`;
-                        const shareContainer = document.createElement('div');
-                        shareContainer.className = "flex justify-center items-center";
-
-                        if (doc.id === currentPlayerDocId) {
-                            item.classList.add('highlight-me');
-                            playerRank = index + 1;
-                            setTimeout(() => item.scrollIntoView({ behavior: 'smooth', block: 'center' }), 500);
-                            const shareBtn = document.createElement('button');
-                            shareBtn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"></path><polyline points="16 6 12 2 8 6"></polyline><line x1="12" y1="2" x2="12" y2="15"></line></svg>`;
-                            shareBtn.className = 'text-gray-400 hover:text-white transition';
-                            shareBtn.onclick = (e) => { e.stopPropagation(); playSound('click'); showShareModal(playerRank, player.score); };
-                            shareContainer.appendChild(shareBtn);
-                        }
-                        
-                        item.innerHTML = rankEl + nameEl + scoreEl;
-                        item.appendChild(shareContainer);
-                        leaderboardList.appendChild(item);
-
-                        if (index < 3) {
-                            const topPlayerItem = document.createElement('div');
-                            topPlayerItem.className = 'flex justify-between items-center text-lg';
-                            topPlayerItem.innerHTML = `<span class="font-bold text-yellow-400">#${index + 1} ${player.nickname}</span> <span class="text-gray-300">${player.score}分</span>`;
-                            topPlayersList.appendChild(topPlayerItem);
-                        }
+                        const topPlayerItem = document.createElement('div');
+                        topPlayerItem.className = 'flex justify-between items-center text-lg';
+                        topPlayerItem.innerHTML = `<span class="font-bold text-yellow-400">#${index + 1} ${player.nickname}</span> <span class="text-gray-300">${player.score}分</span>`;
+                        topPlayersList.appendChild(topPlayerItem);
                     });
-                    
-                    if (currentPlayerDocId) {
-                        clearTimeout(replayTimeout);
-                        replayTimeout = setTimeout(() => {
-                            if (screens.leaderboard.classList.contains('active')) {
-                                replayModal.classList.add('active');
-                                
-                                clearTimeout(replayModalTimeout);
-                                replayModalTimeout = setTimeout(() => {
-                                    if (replayModal.classList.contains('active')) {
-                                        replayModal.classList.remove('active');
-                                        switchScreen('start');
-                                    }
-                                }, 15000);
-                            }
-                        }, 15000);
-                    }
                 }
             }, (error) => {
-                 console.error("監聽排行榜失敗:", error);
-                 leaderboardList.innerHTML = '';
-                 if (leaderboardList && leaderboardMessage) {
-                    leaderboardMessage.textContent = '讀取排行榜失敗，請檢查 Firestore 規則與網路連線。';
-                    if (!leaderboardList.contains(leaderboardMessage)) leaderboardList.appendChild(leaderboardMessage);
-                    if(error.code === 'failed-precondition') {
-                        leaderboardMessage.innerHTML += '<br><br><small>提示：請按 F12 打開開發者工具，查看 Console 中的錯誤連結來建立索引。</small>';
-                    }
-                 }
+                 console.error("監聽 Top 3 失敗:", error);
+                 topPlayersContainer.classList.add('opacity-0');
             });
         }
         
-        function showShareModal(rank, shareScore) {
-            const shareText = document.getElementById('share-text');
-            shareText.value = `太狂了！我在三星門市的 #Galaxy怪物 挑戰賽拿到 ${shareScore} 分，全國第 ${rank} 名！快來挑戰我的紀錄！ #三星智慧館`;
-            shareModal.classList.add('active');
+        // **修改：showFullLeaderboard 函式 (讀取全部)**
+        async function showFullLeaderboard() {
+            const leaderboardList = document.getElementById('leaderboard-list');
+            let leaderboardMessage = document.getElementById('leaderboard-message');
+            
+            if (!leaderboardList) return; 
+
+            if (!leaderboardMessage) {
+                leaderboardMessage = document.createElement('div');
+                leaderboardMessage.id = 'leaderboard-message';
+                leaderboardMessage.className = 'p-8 text-center text-gray-400 text-lg sm:text-xl';
+            }
+            
+            leaderboardMessage.textContent = '排行榜載入中...';
+            leaderboardList.innerHTML = '';
+            leaderboardList.appendChild(leaderboardMessage);
+
+            try {
+                // **修改：移除 limit(50)**
+                const q = query(leaderboardRef, orderBy("score", "desc"), orderBy("totalTime", "asc"));
+                const querySnapshot = await getDocs(q);
+
+                leaderboardList.innerHTML = ''; // Clear "loading"
+
+                if (querySnapshot.empty) {
+                    leaderboardMessage.textContent = '目前還沒有人挑戰成功，快來搶頭香！';
+                    leaderboardList.appendChild(leaderboardMessage);
+                } else {
+                    querySnapshot.docs.forEach((doc, index) => {
+                        const player = doc.data();
+                        const item = document.createElement('div');
+                        item.classList.add('leaderboard-item', 'text-lg', 'sm:text-xl', 'border-t', 'border-gray-700', '!grid-cols-[1fr,4fr,2fr]'); // 3 欄
+                        if (index < 3) item.classList.add('font-bold', 'text-yellow-400');
+                        
+                        item.innerHTML = `
+                            <span>#${index + 1}</span>
+                            <span class="truncate">${player.nickname}</span>
+                            <span class="text-right">${player.score}</span>
+                        `;
+                        leaderboardList.appendChild(item);
+                    });
+                }
+            } catch (error) {
+                console.error("讀取完整排行榜失敗:", error);
+                if (leaderboardMessage) {
+                    leaderboardMessage.textContent = '讀取排行榜失敗，請檢查網路連線。';
+                    if (!leaderboardList.contains(leaderboardMessage)) {
+                        leaderboardList.innerHTML = '';
+                        leaderboardList.appendChild(leaderboardMessage);
+                    }
+                    if (error.code === 'failed-precondition') {
+                         leaderboardMessage.innerHTML += '<br><br><small>索引錯誤，請聯繫管理員。</small>';
+                    }
+                }
+            }
         }
+        
+        // **移除 showShareModal 函式**
 
         async function handleInteraction(callback) {
             try {
@@ -766,12 +732,16 @@
             }
         }
 
-
-        startBtn.onclick = () => handleInteraction(() => { currentPlayerDocId = null; switchScreen('rules'); });
+        startBtn.onclick = () => handleInteraction(() => { switchScreen('rules'); });
         playBtn.onclick = () => handleInteraction(startGame);
         submitScoreBtn.onclick = () => handleInteraction(saveScore);
-        leaderboardBtn.onclick = () => handleInteraction(() => { currentPlayerDocId = null; switchScreen('leaderboard'); });
-        closeLeaderboardBtn.onclick = () => handleInteraction(() => { currentPlayerDocId = null; switchScreen('start'); });
+        
+        leaderboardBtn.onclick = () => handleInteraction(() => { 
+            switchScreen('leaderboard'); 
+            showFullLeaderboard(); 
+        });
+        
+        closeLeaderboardBtn.onclick = () => handleInteraction(() => { switchScreen('start'); });
         
         logScoreBtn.onclick = () => handleInteraction(endGame);
         continueChallengeBtn.onclick = () => handleInteraction(() => {
@@ -779,17 +749,7 @@
             switchScreen('quiz');
         });
 
-        replayBtn.onclick = () => { clearTimeout(replayModalTimeout); replayModal.classList.remove('active'); handleInteraction(startGame); };
-        backToHomeBtn.onclick = () => { clearTimeout(replayModalTimeout); replayModal.classList.remove('active'); handleInteraction(() => switchScreen('start')); };
-        closeShareModalBtn.onclick = () => { playSound('click'); shareModal.classList.remove('active'); };
-        copyShareTextBtn.onclick = () => {
-            playSound('click');
-            const shareText = document.getElementById('share-text');
-            shareText.select();
-            document.execCommand('copy');
-            copyShareTextBtn.textContent = '已複製!';
-            setTimeout(() => { copyShareTextBtn.textContent = '複製文字'; }, 2000);
-        };
+        // **移除 modal 相關的監聽**
         
         ['mousedown', 'mousemove', 'touchstart', 'keydown'].forEach(event => document.addEventListener(event, resetIdleTimer, true));
 
@@ -888,7 +848,7 @@
 
 
         resizeCanvas(); initParticles(); animateParticles();
-        setupLeaderboardListener();
+        setupLeaderboardListener(); // This will now ONLY set up the Top 3 real-time listener
         resetIdleTimer();
 
     </script>
